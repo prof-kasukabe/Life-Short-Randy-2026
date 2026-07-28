@@ -17,6 +17,7 @@ export function Navbar() {
     { name: 'Media', path: '/media' },
     { name: 'Bookmarks', path: '/bookmarks' },
     { name: 'Contact', path: '/contact' },
+    { name: 'Admin', path: '/admin' },
   ];
 
   return (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Tv, Headphones, ExternalLink, MapPin, Sparkles, Compass } from 'lucide-react';
+import { ArrowRight, Tv, Headphones, ExternalLink, MapPin, Sparkles, Compass, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { collection, getDocs, limit, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -90,7 +90,14 @@ export function Home() {
               >
                 Get in Touch
               </Link>
-
+              <Link
+                to="/admin"
+                className="inline-flex items-center justify-center px-5 py-3 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-orange-600 dark:hover:bg-orange-500 dark:hover:text-white font-medium text-sm rounded-full transition-all shadow-xs gap-2 group"
+                title="Admin Control Center"
+              >
+                <Shield size={16} className="text-orange-400 dark:text-orange-600 group-hover:text-white transition-colors" />
+                <span>Admin</span>
+              </Link>
             </div>
           </div>
         </div>
