@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../lib/firebase';
-import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  signOut, 
+  onAuthStateChanged, 
+  User,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
+} from 'firebase/auth';
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { Helmet } from 'react-helmet-async';
 import { getMediaThumbnail } from '../lib/media';
+import { Lock, Mail, Key, UserCheck, Shield, AlertCircle } from 'lucide-react';
 
 export function Admin() {
   const [user, setUser] = useState<User | null>(null);
@@ -11,6 +20,13 @@ export function Admin() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Auth states for Email/ID + Password
+  const [adminId, setAdminId] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   
   // Form states
   const [formData, setFormData] = useState<any>({});
@@ -47,12 +63,53 @@ export function Admin() {
     setLoading(false);
   };
 
-  const handleLogin = async () => {
+  const handleGoogleLogin = async () => {
+    setAuthError('');
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error("Error signing in: ", error);
+    } catch (error: any) {
+      console.error("Error signing in with Google: ", error);
+      setAuthError(error.message || 'Google sign in failed');
+    }
+  };
+
+  const handleEmailPasswordAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthLoading(true);
+
+    if (!adminId.trim() || !adminPassword.trim()) {
+      setAuthError('Please fill in both ID/Email and Password.');
+      setAuthLoading(false);
+      return;
+    }
+
+    // Format email if plain username/ID is provided
+    let email = adminId.trim();
+    if (!email.includes('@')) {
+      email = `${email.toLowerCase()}@admin.com`;
+    }
+
+    try {
+      if (isRegistering) {
+        await createUserWithEmailAndPassword(auth, email, adminPassword);
+      } else {
+        await signInWithEmailAndPassword(auth, email, adminPassword);
+      }
+    } catch (err: any) {
+      console.error("Auth error:", err);
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setAuthError('Invalid ID or password. If you haven\'t created an account yet, switch to "Create Account".');
+      } else if (err.code === 'auth/email-already-in-use') {
+        setAuthError('An account with this ID already exists. Please switch to "Sign In".');
+      } else if (err.code === 'auth/weak-password') {
+        setAuthError('Password should be at least 6 characters.');
+      } else {
+        setAuthError(err.message || 'Authentication failed');
+      }
+    } finally {
+      setAuthLoading(false);
     }
   };
 
@@ -123,18 +180,102 @@ export function Admin() {
 
   if (!user) {
     return (
-      <div className="pt-24 pb-32 flex flex-col items-center justify-center min-h-[55vh]">
+      <div className="pt-24 pb-32 flex flex-col items-center justify-center min-h-[65vh] px-4">
         <Helmet>
           <title>Admin Login - Randy</title>
         </Helmet>
-        <div className="w-full max-w-md p-8 rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-2 block">Management</span>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">Admin Panel<span className="text-orange-500">.</span></h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-8">Sign in with your Google account to manage portfolio, blogs, and media content.</p>
+        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm text-left">
+          <div className="text-center mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto mb-3 border border-orange-500/20">
+              <Shield size={24} />
+            </div>
+            <span className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-1 block">Management</span>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Admin Access<span className="text-orange-500">.</span></h1>
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+              Enter your ID &amp; password or sign in with Google.
+            </p>
+          </div>
+
+          {authError && (
+            <div className="mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs flex items-start gap-2">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <span>{authError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleEmailPasswordAuth} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1.5">
+                Admin ID / Email
+              </label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <input
+                  type="text"
+                  placeholder="e.g. admin or randy@admin.com"
+                  value={adminId}
+                  onChange={(e) => setAdminId(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <Key size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={authLoading}
+              className="w-full py-3 px-6 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-orange-500/25 flex items-center justify-center gap-2"
+            >
+              <Lock size={16} />
+              {authLoading ? 'Authenticating...' : isRegistering ? 'Create Admin Account' : 'Sign In with ID'}
+            </button>
+          </form>
+
+          <div className="flex items-center justify-between text-xs mt-3">
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegistering(!isRegistering);
+                setAuthError('');
+              }}
+              className="text-orange-600 dark:text-orange-400 hover:underline font-medium"
+            >
+              {isRegistering ? 'Already have an ID? Sign In' : 'Need an ID? Create Admin Account'}
+            </button>
+          </div>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-zinc-200 dark:border-zinc-800" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white dark:bg-zinc-950 px-2 text-zinc-400 font-medium">Or</span>
+            </div>
+          </div>
+
           <button 
-            onClick={handleLogin}
-            className="w-full py-3.5 px-6 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-orange-500/25 flex items-center justify-center gap-2"
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full py-3 px-6 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 border border-zinc-200/80 dark:border-zinc-800/80"
           >
+            <UserCheck size={16} className="text-orange-500" />
             Sign in with Google
           </button>
         </div>
