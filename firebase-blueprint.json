@@ -1,0 +1,25 @@
+{
+  "collections": [
+    {
+      "name": "portfolios",
+      "fields": [
+        { "name": "title", "type": "string" },
+        { "name": "category", "type": "string" },
+        { "name": "imageUrl", "type": "string" },
+        { "name": "description", "type": "string" },
+        { "name": "createdAt", "type": "timestamp" }
+      ]
+    },
+    {
+      "name": "blogs",
+      "fields": [
+        { "name": "title", "type": "string" },
+        { "name": "excerpt", "type": "string" },
+        { "name": "content", "type": "string" },
+        { "name": "date", "type": "string" },
+        { "name": "readTime", "type": "string" },
+        { "name": "createdAt", "type": "timestamp" }
+      ]
+    }
+  ]
+}

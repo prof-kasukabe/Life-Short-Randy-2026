@@ -1,0 +1,8 @@
+{
+  "name": "Randy's Minimalist Portfolio",
+  "description": "A minimalist personal website with a dark mode, portfolio gallery, blog integration, and contact system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

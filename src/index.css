@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer utilities {
+  .font-serif-display {
+    font-family: 'Instrument Serif', 'Playfair Display', Georgia, serif;
+  }
+  .font-sans-clean {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+}
+
+::selection {
+  background-color: rgba(249, 115, 22, 0.25);
+  color: #ea580c;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  @apply bg-zinc-50 text-zinc-900 antialiased transition-colors duration-300;
+}
+
+.dark body {
+  @apply bg-zinc-950 text-zinc-100;
+}
+
