@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { db } from '../lib/firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { MediaItem } from '../types';
 import { Tv, Headphones, ExternalLink } from 'lucide-react';
 import { getMediaThumbnail } from '../lib/media';
@@ -14,13 +14,12 @@ export function Media() {
   useEffect(() => {
     const fetchMedia = async () => {
       try {
-        const mediaQuery = query(collection(db, 'media'), orderBy('date', 'desc'));
-        const querySnapshot = await getDocs(mediaQuery);
+        const querySnapshot = await getDocs(collection(db, 'media'));
         const items = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as MediaItem[];
-        setMediaItems(items);
+        setMediaItems(items.reverse());
       } catch (error) {
         console.error("Error fetching media:", error);
       } finally {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { db } from '../lib/firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { BookmarkItem } from '../types';
 import { Search, ChevronRight, ChevronDown } from 'lucide-react';
 
@@ -14,13 +14,12 @@ export function Bookmarks() {
   useEffect(() => {
     const fetchBookmarks = async () => {
       try {
-        const bookmarksQuery = query(collection(db, 'bookmarks'), orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(bookmarksQuery);
+        const querySnapshot = await getDocs(collection(db, 'bookmarks'));
         const items = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as BookmarkItem[];
-        setBookmarks(items);
+        setBookmarks(items.reverse());
       } catch (error) {
         console.error("Error fetching bookmarks:", error);
       } finally {
@@ -36,14 +35,14 @@ export function Bookmarks() {
     bookmark.url.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const bookmarksByCategory = filteredBookmarks.reduce((acc, bookmark) => {
+  const bookmarksByCategory = filteredBookmarks.reduce<Record<string, BookmarkItem[]>>((acc, bookmark) => {
     const category = bookmark.category || 'Uncategorized';
     if (!acc[category]) {
       acc[category] = [];
     }
     acc[category].push(bookmark);
     return acc;
-  }, {} as Record<string, BookmarkItem[]>);
+  }, {});
 
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => ({
@@ -92,7 +91,7 @@ export function Bookmarks() {
         <p className="text-zinc-500 dark:text-zinc-400">No bookmarks found.</p>
       ) : (
         <div className="space-y-4">
-          {Object.entries(bookmarksByCategory).sort(([a], [b]) => a.localeCompare(b)).map(([category, items]) => (
+          {(Object.entries(bookmarksByCategory) as [string, BookmarkItem[]][]).sort(([a], [b]) => a.localeCompare(b)).map(([category, items]) => (
             <div key={category} className="border-b border-zinc-200/80 dark:border-zinc-800/80 pb-4">
               <button
                 onClick={() => toggleCategory(category)}
