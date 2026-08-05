@@ -43,8 +43,11 @@ export function Contact() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-2 block">Get in Touch</span>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 text-zinc-900 dark:text-zinc-50">Let's Connect<span className="text-orange-500">.</span></h1>
+          <span className="text-xs font-bold uppercase tracking-widest text-[#E07A5F] dark:text-[#E07A5F] mb-2 block">Get in Touch</span>
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] flex items-center gap-3">
+            <Mail className="text-[#E07A5F]" size={40} />
+            Let's Connect<span className="text-[#E07A5F]">.</span>
+          </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-12 max-w-md leading-relaxed">
             I'm currently open for interesting collaborations, web projects, or technical conversations. 
             Send a note and I'll respond as soon as possible!

@@ -12,7 +12,7 @@ import {
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { Helmet } from 'react-helmet-async';
 import { getMediaThumbnail } from '../lib/media';
-import { Shield, Lock, Mail, Key, UserCheck, AlertCircle, LogOut, CheckCircle2, Loader2, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Shield, Lock, Mail, Key, UserCheck, AlertCircle, LogOut, CheckCircle2, Loader2, Plus, Edit2, Trash2, Settings } from 'lucide-react';
 
 export function Admin() {
   const [user, setUser] = useState<User | null>(null);
@@ -234,8 +234,8 @@ export function Admin() {
             <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto mb-3 border border-orange-500/20">
               <Shield size={24} />
             </div>
-            <span className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-1 block">Management</span>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Admin Access<span className="text-orange-500">.</span></h1>
+            <span className="text-xs font-bold uppercase tracking-widest text-[#E07A5F] dark:text-[#E07A5F] mb-1 block">Management</span>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#2C241B] dark:text-[#FDFBF7]">Admin Access<span className="text-[#E07A5F]">.</span></h1>
             <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
               Sign in with your Google account or enter Admin ID to access your data.
             </p>
@@ -337,8 +337,11 @@ export function Admin() {
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-1 block">Control Center</span>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Admin Dashboard<span className="text-orange-500">.</span></h1>
+          <span className="text-xs font-bold uppercase tracking-widest text-[#E07A5F] dark:text-[#E07A5F] mb-1 block">Control Center</span>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#2C241B] dark:text-[#FDFBF7] flex items-center gap-3">
+            <Settings className="text-[#E07A5F]" size={32} />
+            Admin Dashboard<span className="text-[#E07A5F]">.</span>
+          </h1>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2.5 bg-orange-500/10 border border-orange-500/20 px-3.5 py-2 rounded-full">

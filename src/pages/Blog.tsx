@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search } from 'lucide-react';
+import { Search, BookOpen } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { BlogPost } from '../types';
@@ -41,21 +41,24 @@ export function Blog() {
   }, [searchQuery, blogData]);
 
   return (
-    <div className="pt-24 pb-32 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="pt-32 pb-32 max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
       <Helmet>
         <title>Curated Writings - Randy's Minimalist Portfolio</title>
         <meta name="description" content="Long stories about life after reading, curated reflections, and notes." />
       </Helmet>
-      <div className="max-w-3xl mb-12">
-        <span className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-2 block">Notes &amp; Writings</span>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-zinc-900 dark:text-zinc-50">Curated Writings<span className="text-orange-500">.</span></h1>
-        <p className="text-lg sm:text-xl text-zinc-600 dark:text-zinc-400">
-          Long stories about life after reading.
+      
+      <div className="max-w-3xl mb-20">
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] leading-tight flex items-center gap-4">
+          <BookOpen className="text-[#E07A5F]" size={48} />
+          Curated Reading
+        </h1>
+        <p className="text-xl text-zinc-600 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
+          Reflections, notes, and observations.
         </p>
       </div>
 
-      <div className="relative mb-12">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+      <div className="relative mb-16">
+        <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
           <Search size={18} className="text-zinc-400" />
         </div>
         <input
@@ -63,39 +66,39 @@ export function Blog() {
           placeholder="Search articles..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full pl-10 pr-4 py-3.5 border-b-2 border-zinc-200 dark:border-zinc-800 bg-transparent text-lg placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-colors"
+          className="block w-full pl-8 pr-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-transparent text-lg placeholder-zinc-500 focus:outline-none focus:border-zinc-500 dark:focus:border-zinc-400 transition-colors"
         />
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-12">
         {filteredPosts.map((post) => (
-          <article key={post.id} className="group p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/80 hover:border-orange-500/40 transition-all shadow-sm">
+          <article key={post.id} className="group">
             {post.url ? (
               <a href={post.url} target="_blank" rel="noopener noreferrer" className="block">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                  <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors flex items-center gap-2">
+                <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-2 border-b border-zinc-200/50 dark:border-zinc-800/50 pb-6">
+                  <h2 className="text-xl md:text-2xl font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-orange-500 transition-colors flex items-center gap-3">
                     {post.iconUrl && (
                       <img src={post.iconUrl} alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
                     )}
                     {post.title}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-40 group-hover:opacity-100 group-hover:text-orange-500 transition-all"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-300 dark:text-zinc-700 group-hover:text-orange-500 transition-colors"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
                   </h2>
-                  <div className="flex items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400 shrink-0">
-                    <span className="bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2.5 py-0.5 rounded-full text-xs font-semibold">{getDomain(post.url)}</span>
-                    <time>{post.date}</time>
+                  <div className="flex items-center gap-4 text-sm shrink-0">
+                    <span className="text-zinc-500 dark:text-zinc-400">{getDomain(post.url)}</span>
+                    <time className="text-zinc-400 dark:text-zinc-500 font-serif-display italic">{post.date}</time>
                   </div>
                 </div>
               </a>
             ) : (
               <Link to={`/blog/${post.id}`} className="block">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                  <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors flex items-center gap-2">
+                <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-2 border-b border-zinc-200/50 dark:border-zinc-800/50 pb-6">
+                  <h2 className="text-xl md:text-2xl font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-orange-500 transition-colors flex items-center gap-3">
                     {post.iconUrl && (
                       <img src={post.iconUrl} alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
                     )}
                     {post.title}
                   </h2>
-                  <time className="text-sm text-zinc-500 dark:text-zinc-400 shrink-0">{post.date}</time>
+                  <time className="text-sm text-zinc-400 dark:text-zinc-500 font-serif-display italic shrink-0">{post.date}</time>
                 </div>
               </Link>
             )}

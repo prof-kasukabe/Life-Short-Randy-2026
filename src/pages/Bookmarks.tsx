@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { db } from '../lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { BookmarkItem } from '../types';
-import { Search, ChevronRight, ChevronDown } from 'lucide-react';
+import { Search, ChevronRight, ChevronDown, Bookmark } from 'lucide-react';
 
 export function Bookmarks() {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
@@ -36,7 +36,13 @@ export function Bookmarks() {
   );
 
   const bookmarksByCategory = filteredBookmarks.reduce<Record<string, BookmarkItem[]>>((acc, bookmark) => {
-    const category = bookmark.category || 'Uncategorized';
+    let category = (bookmark.category || 'Uncategorized').trim();
+    // Find if a category with the same lowercase string already exists
+    const existingKey = Object.keys(acc).find(key => key.toLowerCase() === category.toLowerCase());
+    if (existingKey) {
+      category = existingKey;
+    }
+    
     if (!acc[category]) {
       acc[category] = [];
     }
@@ -61,8 +67,11 @@ export function Bookmarks() {
       </Helmet>
       
       <div className="mb-12">
-        <span className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-2 block">Resource Directory</span>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-zinc-900 dark:text-zinc-50">My {totalBookmarks} Bookmarks</h1>
+        <span className="text-xs font-bold uppercase tracking-widest text-[#E07A5F] dark:text-[#E07A5F] mb-2 block">Resource Directory</span>
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-[#2C241B] dark:text-[#FDFBF7] flex items-center gap-3">
+          <Bookmark className="text-[#E07A5F]" size={40} />
+          My {totalBookmarks} Bookmarks
+        </h1>
         <p className="text-lg sm:text-xl text-zinc-600 dark:text-zinc-400">
           On AI Research, Business, Software, and Digital Media
         </p>

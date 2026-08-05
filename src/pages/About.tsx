@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { User } from 'lucide-react';
 
 export function About() {
   return (
@@ -10,8 +11,11 @@ export function About() {
       </Helmet>
       
       <div className="mb-12">
-        <span className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-2 block">Biography</span>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-zinc-900 dark:text-zinc-50">About Me<span className="text-orange-500">.</span></h1>
+        <span className="text-xs font-bold uppercase tracking-widest text-[#E07A5F] dark:text-[#E07A5F] mb-2 block">Biography</span>
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-[#2C241B] dark:text-[#FDFBF7] flex items-center gap-3">
+          <User className="text-[#E07A5F]" size={40} />
+          About Me<span className="text-[#E07A5F]">.</span>
+        </h1>
       </div>
       
       <div className="space-y-6 text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">

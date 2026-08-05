@@ -12,16 +12,22 @@
 }
 
 ::selection {
-  background-color: rgba(249, 115, 22, 0.25);
-  color: #ea580c;
+  background-color: rgba(224, 122, 95, 0.25);
+  color: #e07a5f;
 }
 
 body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  @apply bg-zinc-50 text-zinc-900 antialiased transition-colors duration-300;
+  @apply bg-[#FDFBF7] text-[#2C241B] antialiased transition-colors duration-300;
 }
 
 .dark body {
-  @apply bg-zinc-950 text-zinc-100;
+  @apply bg-[#1E1A18] text-[#FDFBF7];
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
 }
 
