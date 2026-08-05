@@ -5,6 +5,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { MediaItem } from '../types';
 import { Tv, Headphones, ExternalLink, PlaySquare } from 'lucide-react';
 import { getMediaThumbnail } from '../lib/media';
+import avatarMedia from '../assets/images/avatar_media_1785947024971.jpg';
 
 export function Media() {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
@@ -41,14 +42,20 @@ export function Media() {
         <meta name="description" content="My curated list of videos and audio, including podcasts and YouTube channels." />
       </Helmet>
       
-      <div className="max-w-3xl mb-20">
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] leading-tight flex items-center gap-4">
-          <PlaySquare className="text-[#E07A5F]" size={48} />
-          Watch &amp; Listen
-        </h1>
-        <p className="text-xl text-zinc-600 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
-          My curated list of podcasts, talks, and YouTube videos.
-        </p>
+      <div className="flex flex-col md:flex-row gap-12 items-start mb-20">
+        <div className="shrink-0">
+          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-3 hover:rotate-6 transition-transform">
+            <img src={avatarMedia} alt="Randy Avatar - Media" className="w-full h-full object-cover" />
+          </div>
+        </div>
+        <div className="max-w-3xl">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] leading-tight flex items-center gap-4">
+            Watch &amp; Listen
+          </h1>
+          <p className="text-xl text-zinc-600 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
+            My curated list of podcasts, talks, and YouTube videos.
+          </p>
+        </div>
       </div>
 
       <div className="flex gap-3 mb-16 border-b border-zinc-200/50 dark:border-zinc-800/50 pb-4 overflow-x-auto">

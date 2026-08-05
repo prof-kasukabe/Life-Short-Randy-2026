@@ -4,6 +4,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { PortfolioItem } from '../types';
 import { Helmet } from 'react-helmet-async';
+import avatarCurated from '../assets/images/avatar_curated_1785947000633.jpg';
 
 export function Portfolio() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,14 +53,20 @@ export function Portfolio() {
         <meta name="description" content="A Long stories about life after reading" />
       </Helmet>
       
-      <div className="max-w-3xl mb-20">
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] leading-tight flex items-center gap-4">
-          <Palette className="text-[#E07A5F]" size={48} />
-          Curated Works
-        </h1>
-        <p className="text-xl text-zinc-600 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
-          A selection of stories and visual projects crafted carefully over time.
-        </p>
+      <div className="flex flex-col md:flex-row gap-12 items-start mb-20">
+        <div className="shrink-0">
+          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-3 hover:rotate-6 transition-transform">
+            <img src={avatarCurated} alt="Randy Avatar - Curated" className="w-full h-full object-cover" />
+          </div>
+        </div>
+        <div className="max-w-3xl">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] leading-tight flex items-center gap-4">
+            Curated Works
+          </h1>
+          <p className="text-xl text-zinc-600 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
+            A selection of stories and visual projects crafted carefully over time.
+          </p>
+        </div>
       </div>
 
       {/* Filters and Search */}

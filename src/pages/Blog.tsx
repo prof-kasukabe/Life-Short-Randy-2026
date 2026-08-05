@@ -5,6 +5,7 @@ import { db } from '../lib/firebase';
 import { BlogPost } from '../types';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import avatarReading from '../assets/images/avatar_reading_1785947012435.jpg';
 
 const getDomain = (url: string) => {
   try {
@@ -47,14 +48,20 @@ export function Blog() {
         <meta name="description" content="Long stories about life after reading, curated reflections, and notes." />
       </Helmet>
       
-      <div className="max-w-3xl mb-20">
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] leading-tight flex items-center gap-4">
-          <BookOpen className="text-[#E07A5F]" size={48} />
-          Curated Reading
-        </h1>
-        <p className="text-xl text-zinc-600 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
-          Reflections, notes, and observations.
-        </p>
+      <div className="flex flex-col md:flex-row gap-12 items-start mb-20">
+        <div className="shrink-0">
+          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-[-3deg] hover:rotate-3 transition-transform">
+            <img src={avatarReading} alt="Randy Avatar - Reading" className="w-full h-full object-cover" />
+          </div>
+        </div>
+        <div className="max-w-3xl">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] leading-tight flex items-center gap-4">
+            Curated Reading
+          </h1>
+          <p className="text-xl text-zinc-600 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
+            Reflections, notes, and observations.
+          </p>
+        </div>
       </div>
 
       <div className="relative mb-16">

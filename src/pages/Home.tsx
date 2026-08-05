@@ -50,7 +50,7 @@ export function Home() {
       </Helmet>
       {/* Hero Section */}
       <section className="flex-grow flex items-center pt-32 pb-24">
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 w-full flex flex-col md:flex-row items-center gap-12 md:gap-20">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 w-full flex flex-col-reverse md:flex-row items-center gap-12 md:gap-20">
           <div className="max-w-2xl flex-1">
             <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif-display font-medium tracking-tight text-[#2C241B] dark:text-[#FDFBF7] mb-8 leading-tight">
               Curious explorer of the <span className="italic text-[#E07A5F] dark:text-[#E07A5F]">endless web</span> & digital craftsman.
