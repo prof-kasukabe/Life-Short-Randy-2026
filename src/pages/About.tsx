@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { User } from 'lucide-react';
-import avatarAbout from '../assets/images/avatar_about_1785946988505.jpg';
+import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
 
 export function About() {
   return (
@@ -12,9 +12,9 @@ export function About() {
       </Helmet>
       
       <div className="flex flex-col md:flex-row gap-12 items-start mb-12">
-        <div className="shrink-0">
-          <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-[-3deg] hover:rotate-3 transition-transform">
-            <img src={avatarAbout} alt="Randy Avatar" className="w-full h-full object-cover" />
+        <div className="shrink-0 animate-[float_6s_ease-in-out_infinite]">
+          <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-3 hover:rotate-6 transition-transform">
+            <img src={avatarImg} alt="Randy Avatar" className="w-full h-full object-cover" />
           </div>
         </div>
         

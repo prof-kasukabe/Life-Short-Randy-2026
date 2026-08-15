@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Search, X, ZoomIn, Palette } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { PortfolioItem } from '../types';
 import { Helmet } from 'react-helmet-async';
-import avatarCurated from '../assets/images/avatar_curated_1785947000633.jpg';
+import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
 
 export function Portfolio() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,16 +55,16 @@ export function Portfolio() {
       </Helmet>
       
       <div className="flex flex-col md:flex-row gap-12 items-start mb-20">
-        <div className="shrink-0">
+        <div className="shrink-0 animate-[float_6s_ease-in-out_infinite]">
           <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-3 hover:rotate-6 transition-transform">
-            <img src={avatarCurated} alt="Randy Avatar - Curated" className="w-full h-full object-cover" />
+            <img src={avatarImg} alt="Randy Avatar - Curated" className="w-full h-full object-cover" />
           </div>
         </div>
-        <div className="max-w-3xl">
+        <div className="max-w-3xl flex-1">
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] leading-tight flex items-center gap-4">
             Curated Works
           </h1>
-          <p className="text-xl text-zinc-600 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
+          <p className="text-xl text-zinc-600 dark:text-zinc-400 font-light max-w-xl leading-relaxed mb-6">
             A selection of stories and visual projects crafted carefully over time.
           </p>
         </div>
@@ -186,7 +187,7 @@ export function Portfolio() {
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif-display tracking-tight text-[#2C241B] dark:text-[#FDFBF7] mb-6 leading-tight">
                 {lightboxItem.title}
               </h3>
-              <p className="text-lg text-[#4A3F35]/80 dark:text-[#E8E2D9]/80 leading-relaxed">
+              <p className="text-lg text-[#4A3F35]/80 dark:text-[#E8E2D9]/80 leading-relaxed overflow-y-auto max-h-[30vh] lg:max-h-[50vh] pr-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#4A3F35]/20 dark:[&::-webkit-scrollbar-thumb]:bg-[#FDFBF7]/20 [&::-webkit-scrollbar-thumb]:rounded-full">
                 {lightboxItem.description}
               </p>
             </div>

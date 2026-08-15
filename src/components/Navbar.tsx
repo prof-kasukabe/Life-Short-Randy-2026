@@ -17,7 +17,6 @@ export function Navbar() {
     { name: 'Media', path: '/media', icon: PlaySquare },
     { name: 'Bookmarks', path: '/bookmarks', icon: Bookmark },
     { name: 'Contact', path: '/contact', icon: Mail },
-    { name: 'Admin', path: '/admin', icon: Settings },
   ];
 
   return (

@@ -18,6 +18,8 @@ import { Contact } from './pages/Contact';
 
 import { Admin } from './pages/Admin';
 
+import { DitherTool } from './pages/DitherTool';
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -35,6 +37,7 @@ export default function App() {
               <Route path="/blog/:id" element={<BlogPostDetail />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/tools/dither" element={<DitherTool />} />
             </Routes>
           </main>
           <Footer />

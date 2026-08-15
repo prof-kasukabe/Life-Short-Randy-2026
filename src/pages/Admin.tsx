@@ -37,9 +37,15 @@ export function Admin() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        fetchData(activeTab);
+      if (currentUser && currentUser.email !== 'randyeef00@gmail.com') {
+        signOut(auth);
+        setUser(null);
+        setAuthError('Unauthorized access. Only admin (randyeef00@gmail.com) can log in.');
+      } else {
+        setUser(currentUser);
+        if (currentUser) {
+          fetchData(activeTab);
+        }
       }
     });
 
@@ -74,7 +80,11 @@ export function Admin() {
     setAuthLoading(true);
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      if (result.user.email !== 'randyeef00@gmail.com') {
+        await signOut(auth);
+        setAuthError('Unauthorized access. Only admin (randyeef00@gmail.com) can log in.');
+      }
     } catch (error: any) {
       console.error("Auth popup error: ", error);
       setAuthError(error.message || 'Google Login failed');

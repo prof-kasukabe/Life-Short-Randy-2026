@@ -13,14 +13,6 @@ export function Footer() {
             <span>&copy; {currentYear} Randy</span>
             <span className="text-orange-500 font-bold">&middot;</span>
             <span>All rights reserved.</span>
-            <span className="text-zinc-300 dark:text-zinc-700">&middot;</span>
-            <Link 
-              to="/admin" 
-              className="inline-flex items-center gap-1 text-xs font-medium text-zinc-500 hover:text-orange-600 dark:text-zinc-400 dark:hover:text-orange-400 transition-colors"
-            >
-              <Shield size={13} className="text-orange-500" />
-              <span>Admin</span>
-            </Link>
           </div>
           <div className="flex space-x-6">
             <a href="#" className="text-zinc-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">

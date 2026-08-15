@@ -4,7 +4,7 @@ import { db } from '../lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { BookmarkItem } from '../types';
 import { Search, ChevronRight, ChevronDown, Bookmark } from 'lucide-react';
-import avatarBookmarks from '../assets/images/avatar_bookmarks_1785947037175.jpg';
+import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
 
 export function Bookmarks() {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
@@ -68,9 +68,9 @@ export function Bookmarks() {
       </Helmet>
       
       <div className="flex flex-col md:flex-row gap-8 items-start mb-12">
-        <div className="shrink-0">
-          <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-[-3deg] hover:rotate-3 transition-transform">
-            <img src={avatarBookmarks} alt="Randy Avatar - Bookmarks" className="w-full h-full object-cover" />
+        <div className="shrink-0 animate-[float_6s_ease-in-out_infinite]">
+          <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-3 hover:rotate-6 transition-transform">
+            <img src={avatarImg} alt="Randy Avatar - Bookmarks" className="w-full h-full object-cover" />
           </div>
         </div>
         <div>

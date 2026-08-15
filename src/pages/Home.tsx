@@ -53,26 +53,27 @@ export function Home() {
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 w-full flex flex-col-reverse md:flex-row items-center gap-12 md:gap-20">
           <div className="max-w-2xl flex-1">
             <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif-display font-medium tracking-tight text-[#2C241B] dark:text-[#FDFBF7] mb-8 leading-tight">
-              Curious explorer of the <span className="italic text-[#E07A5F] dark:text-[#E07A5F]">endless web</span> & digital craftsman.
+              Digital explorer of the <span className="italic text-[#E07A5F] dark:text-[#E07A5F]">endless web</span>, crafting visual &amp; verbal experiences.
             </h1>
             
             <p className="text-xl sm:text-2xl font-light text-[#4A3F35] dark:text-[#E8E2D9] max-w-2xl leading-relaxed mb-12">
-              I'm Randy. I observe, design, and build software with a focus on simplicity, usability, and aesthetics.
+              I'm Randy. I blend technical skills with creative thinking to build refined web experiences, with a focus on simplicity, usability, and aesthetics.
             </p>
-
             <div className="flex flex-wrap gap-6 items-center">
               <Link
-                to="/curated"
+                to="/tools/dither"
                 className="inline-flex items-center text-sm font-semibold tracking-wide uppercase bg-[#E07A5F] text-[#FDFBF7] px-8 py-4 rounded-[2rem] hover:scale-105 transition-transform"
               >
-                View Works <ArrowRight size={16} className="ml-2" />
+                Try Dither Tool <ArrowRight size={16} className="ml-2" />
               </Link>
-              <Link
-                to="/contact"
+              <a
+                href="https://scrapbox.io/WarenBergg1995/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center text-sm font-semibold tracking-wide uppercase text-[#4A3F35] hover:text-[#E07A5F] dark:text-[#E8E2D9] transition-colors"
               >
-                Get in Touch
-              </Link>
+                Visual Creative Coding
+              </a>
             </div>
           </div>
           <div className="shrink-0 animate-[float_6s_ease-in-out_infinite]">
