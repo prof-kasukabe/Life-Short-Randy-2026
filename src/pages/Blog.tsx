@@ -55,10 +55,10 @@ export function Blog() {
           </div>
         </div>
         <div className="max-w-3xl">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] leading-tight flex items-center gap-4">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#E84634] dark:text-[#E84634] leading-tight flex items-center gap-4">
             Curated Reading
           </h1>
-          <p className="text-xl text-zinc-600 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
+          <p className="text-xl text-[#E84634] dark:text-[#E84634] font-light max-w-xl leading-relaxed">
             Reflections, notes, and observations.
           </p>
         </div>
@@ -66,7 +66,7 @@ export function Blog() {
 
       <div className="relative mb-16">
         <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
-          <Search size={18} className="text-zinc-400" />
+          <Search size={18} className="text-[#E84634]" />
         </div>
         <input
           type="text"
@@ -83,29 +83,29 @@ export function Blog() {
             {post.url ? (
               <a href={post.url} target="_blank" rel="noopener noreferrer" className="block">
                 <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-2 border-b border-zinc-200/50 dark:border-zinc-800/50 pb-6">
-                  <h2 className="text-xl md:text-2xl font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-orange-500 transition-colors flex items-center gap-3">
+                  <h2 className="text-xl md:text-2xl font-medium text-[#E84634] dark:text-[#E84634] group-hover:text-orange-500 transition-colors flex items-center gap-3">
                     {post.iconUrl && (
                       <img src={post.iconUrl} alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
                     )}
                     {post.title}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-300 dark:text-zinc-700 group-hover:text-orange-500 transition-colors"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#E84634] dark:text-[#E84634] group-hover:text-orange-500 transition-colors"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
                   </h2>
                   <div className="flex items-center gap-4 text-sm shrink-0">
-                    <span className="text-zinc-500 dark:text-zinc-400">{getDomain(post.url)}</span>
-                    <time className="text-zinc-400 dark:text-zinc-500 font-serif-display italic">{post.date}</time>
+                    <span className="text-[#E84634] dark:text-[#E84634]">{getDomain(post.url)}</span>
+                    <time className="text-[#E84634] dark:text-[#E84634] font-serif-display italic">{post.date}</time>
                   </div>
                 </div>
               </a>
             ) : (
               <Link to={`/blog/${post.id}`} className="block">
                 <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-2 border-b border-zinc-200/50 dark:border-zinc-800/50 pb-6">
-                  <h2 className="text-xl md:text-2xl font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-orange-500 transition-colors flex items-center gap-3">
+                  <h2 className="text-xl md:text-2xl font-medium text-[#E84634] dark:text-[#E84634] group-hover:text-orange-500 transition-colors flex items-center gap-3">
                     {post.iconUrl && (
                       <img src={post.iconUrl} alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
                     )}
                     {post.title}
                   </h2>
-                  <time className="text-sm text-zinc-400 dark:text-zinc-500 font-serif-display italic shrink-0">{post.date}</time>
+                  <time className="text-sm text-[#E84634] dark:text-[#E84634] font-serif-display italic shrink-0">{post.date}</time>
                 </div>
               </Link>
             )}
@@ -114,7 +114,7 @@ export function Blog() {
       </div>
 
       {filteredPosts.length === 0 && (
-        <div className="text-center py-12 text-zinc-500">
+        <div className="text-center py-12 text-[#E84634]">
           No articles found matching "{searchQuery}".
         </div>
       )}

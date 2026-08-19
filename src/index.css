@@ -11,18 +11,25 @@
   }
 }
 
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Instrument Serif', 'Playfair Display', Georgia, serif;
+    @apply tracking-tight text-[#E84634];
+  }
+}
+
 ::selection {
-  background-color: rgba(224, 122, 95, 0.25);
-  color: #e07a5f;
+  background-color: rgba(232, 70, 52, 0.25);
+  color: #E84634;
 }
 
 body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  @apply bg-[#FDFBF7] text-[#2C241B] antialiased transition-colors duration-300;
+  @apply bg-[#FDFBF7] text-[#E84634] antialiased transition-colors duration-300;
 }
 
 .dark body {
-  @apply bg-[#1E1A18] text-[#FDFBF7];
+  @apply bg-[#1E1A18] text-[#E84634];
 }
 
 @keyframes float {

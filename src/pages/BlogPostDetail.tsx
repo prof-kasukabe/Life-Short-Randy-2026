@@ -39,7 +39,7 @@ export function BlogPostDetail() {
           <title>Post Not Found - Randy's Minimalist Portfolio</title>
         </Helmet>
         <h1 className="text-3xl font-bold mb-4">Post Not Found</h1>
-        <Link to="/blog" className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 underline">Back to Blog</Link>
+        <Link to="/blog" className="text-[#E84634] hover:text-[#E84634] dark:hover:text-[#E84634] underline">Back to Blog</Link>
       </div>
     );
   }
@@ -55,18 +55,18 @@ export function BlogPostDetail() {
         <meta property="og:type" content="article" />
       </Helmet>
       
-      <Link to="/blog" className="inline-flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors mb-8">
+      <Link to="/blog" className="inline-flex items-center text-sm font-medium text-[#E84634] hover:text-[#E84634] dark:hover:text-[#E84634] transition-colors mb-8">
         <ArrowLeft size={16} className="mr-2" /> Back to Blog
       </Link>
       
       <header className="mb-12">
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6">{post.title}</h1>
-        <div className="flex items-center gap-4 text-zinc-500">
+        <div className="flex items-center gap-4 text-[#E84634]">
           <time>{post.date}</time>
         </div>
       </header>
       
-      <div className="prose prose-zinc dark:prose-invert prose-lg max-w-none text-zinc-600 dark:text-zinc-400">
+      <div className="prose prose-zinc dark:prose-invert prose-lg max-w-none text-[#E84634] dark:text-[#E84634]">
         {post.content ? (
           <div dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br/>') }} />
         ) : null}

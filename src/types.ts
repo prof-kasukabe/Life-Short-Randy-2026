@@ -37,3 +37,13 @@ export interface BookmarkItem {
   category: string;
   createdAt?: any;
 }
+
+export interface VisualItem {
+  id: string;
+  title: string;
+  description?: string;
+  mediaUrl: string;
+  mediaType: 'video' | 'image';
+  date?: string;
+  createdAt?: any;
+}

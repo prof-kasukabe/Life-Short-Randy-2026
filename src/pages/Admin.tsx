@@ -16,7 +16,8 @@ import { Shield, Lock, Mail, Key, UserCheck, AlertCircle, LogOut, CheckCircle2, 
 
 export function Admin() {
   const [user, setUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'blog' | 'media' | 'bookmarks'>('portfolio');
+  const [curatedSpace, setCuratedSpace] = useState<'verbal' | 'visual'>('verbal');
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'visual' | 'blog' | 'media' | 'bookmarks'>('portfolio');
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -43,27 +44,25 @@ export function Admin() {
         setAuthError('Unauthorized access. Only admin (randyeef00@gmail.com) can log in.');
       } else {
         setUser(currentUser);
-        if (currentUser) {
-          fetchData(activeTab);
-        }
       }
     });
 
-    if (isDirectAccess) {
+    if (user || isDirectAccess) {
       fetchData(activeTab);
     }
 
     return () => unsubscribe();
-  }, [activeTab, isDirectAccess]);
+  }, [activeTab, curatedSpace, user, isDirectAccess]);
 
   const getCollectionName = (tab: string) => {
-    if (tab === 'portfolio') return 'portfolios';
+    if (tab === 'portfolio') return curatedSpace === 'verbal' ? 'portfolios' : 'visuals';
+    
     if (tab === 'blog') return 'blogs';
     if (tab === 'bookmarks') return 'bookmarks';
     return 'media';
   };
 
-  const fetchData = async (tab: 'portfolio' | 'blog' | 'media' | 'bookmarks') => {
+  const fetchData = async (tab: 'portfolio' | 'visual' | 'blog' | 'media' | 'bookmarks') => {
     setLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, getCollectionName(tab)));
@@ -167,7 +166,10 @@ export function Admin() {
     let rawData: Record<string, any> = { ...formData };
 
     // Set intelligent fallbacks based on active section
-    if (activeTab === 'portfolio') {
+    if (activeTab === 'portfolio' && curatedSpace === 'visual') {
+      if (!rawData.date) rawData.date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      if (!rawData.mediaType) rawData.mediaType = 'video';
+    } else if (activeTab === 'portfolio' && curatedSpace === 'verbal') {
       if (!rawData.category) rawData.category = 'General';
       if (!rawData.date) rawData.date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       if (!rawData.imageUrl) rawData.imageUrl = 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=800&auto=format&fit=crop';
@@ -244,9 +246,9 @@ export function Admin() {
             <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto mb-3 border border-orange-500/20">
               <Shield size={24} />
             </div>
-            <span className="text-xs font-bold uppercase tracking-widest text-[#E07A5F] dark:text-[#E07A5F] mb-1 block">Management</span>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#2C241B] dark:text-[#FDFBF7]">Admin Access<span className="text-[#E07A5F]">.</span></h1>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#E84634] dark:text-[#E84634] mb-1 block">Management</span>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#E84634] dark:text-[#E84634]">Admin Access<span className="text-[#E84634]">.</span></h1>
+            <p className="text-xs sm:text-sm text-[#E84634] dark:text-[#E84634] mt-1">
               Sign in with your Google account or enter Admin ID to access your data.
             </p>
           </div>
@@ -263,7 +265,7 @@ export function Admin() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={authLoading}
-            className="w-full py-3.5 px-6 bg-zinc-900 hover:bg-orange-600 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-orange-500 dark:hover:text-white text-white rounded-xl font-semibold text-sm transition-all shadow-sm flex items-center justify-center gap-3 border border-transparent group mb-4"
+            className="w-full py-3.5 px-6 bg-zinc-900 hover:bg-orange-600 dark:bg-zinc-100 dark:text-[#E84634] dark:hover:bg-orange-500 dark:hover:text-white text-white rounded-xl font-semibold text-sm transition-all shadow-sm flex items-center justify-center gap-3 border border-transparent group mb-4"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
               <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -279,39 +281,39 @@ export function Admin() {
               <div className="w-full border-t border-zinc-200 dark:border-zinc-800" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white dark:bg-zinc-950 px-2 text-zinc-400 font-medium">Atau ID Admin</span>
+              <span className="bg-white dark:bg-zinc-950 px-2 text-[#E84634] font-medium">Atau ID Admin</span>
             </div>
           </div>
 
           <form onSubmit={handleEmailPasswordAuth} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">
                 Admin ID / Email
               </label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#E84634]" />
                 <input
                   type="text"
                   placeholder="e.g. randy955"
                   value={adminId}
                   onChange={(e) => setAdminId(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-[#E84634] dark:text-[#E84634] focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <Key size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <Key size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#E84634]" />
                 <input
                   type="password"
                   placeholder="••••••••"
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-[#E84634] dark:text-[#E84634] focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
                 />
               </div>
             </div>
@@ -329,7 +331,7 @@ export function Admin() {
           <button 
             type="button"
             onClick={() => setIsRegistering(!isRegistering)}
-            className="w-full mt-4 py-2.5 px-4 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl font-medium text-xs transition-all flex items-center justify-center gap-2 border border-zinc-200/80 dark:border-zinc-800/80"
+            className="w-full mt-4 py-2.5 px-4 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-[#E84634] dark:text-[#E84634] rounded-xl font-medium text-xs transition-all flex items-center justify-center gap-2 border border-zinc-200/80 dark:border-zinc-800/80"
           >
             <UserCheck size={14} className="text-orange-500" />
             <span>{isRegistering ? 'Already have an account? Sign In' : 'Need an account? Register'}</span>
@@ -347,10 +349,10 @@ export function Admin() {
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-[#E07A5F] dark:text-[#E07A5F] mb-1 block">Control Center</span>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#2C241B] dark:text-[#FDFBF7] flex items-center gap-3">
-            <Settings className="text-[#E07A5F]" size={32} />
-            Admin Dashboard<span className="text-[#E07A5F]">.</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-[#E84634] dark:text-[#E84634] mb-1 block">Control Center</span>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#E84634] dark:text-[#E84634] flex items-center gap-3">
+            <Settings className="text-[#E84634]" size={32} />
+            Admin Dashboard<span className="text-[#E84634]">.</span>
           </h1>
         </div>
         <div className="flex items-center gap-3">
@@ -370,7 +372,7 @@ export function Admin() {
             </div>
             <button
               onClick={handleLogout}
-              className="text-zinc-400 hover:text-red-500 transition-colors ml-1"
+              className="text-[#E84634] hover:text-red-500 transition-colors ml-1"
               title="Keluar"
             >
               <LogOut size={14} />
@@ -382,25 +384,25 @@ export function Admin() {
       <div className="flex flex-wrap gap-2 mb-8 border-b border-zinc-200/80 dark:border-zinc-800/80 pb-4">
         <button 
           onClick={() => { setActiveTab('portfolio'); setFormData({}); setEditingId(null); }}
-          className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeTab === 'portfolio' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
+          className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeTab === 'portfolio' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-[#E84634] hover:bg-zinc-200 dark:bg-zinc-900 dark:text-[#E84634] dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
         >
           Curated Works
         </button>
         <button 
           onClick={() => { setActiveTab('blog'); setFormData({}); setEditingId(null); }}
-          className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeTab === 'blog' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
+          className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeTab === 'blog' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-[#E84634] hover:bg-zinc-200 dark:bg-zinc-900 dark:text-[#E84634] dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
         >
           Reading List
         </button>
         <button 
           onClick={() => { setActiveTab('media'); setFormData({}); setEditingId(null); }}
-          className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeTab === 'media' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
+          className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeTab === 'media' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-[#E84634] hover:bg-zinc-200 dark:bg-zinc-900 dark:text-[#E84634] dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
         >
           Watch &amp; Listen
         </button>
         <button 
           onClick={() => { setActiveTab('bookmarks'); setFormData({}); setEditingId(null); }}
-          className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeTab === 'bookmarks' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
+          className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeTab === 'bookmarks' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-[#E84634] hover:bg-zinc-200 dark:bg-zinc-900 dark:text-[#E84634] dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
         >
           Bookmarks
         </button>
@@ -409,7 +411,7 @@ export function Admin() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-1">
           <div className="bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-4">{editingId ? 'Edit Item' : 'Add New Item'}</h2>
+            <h2 className="text-lg font-bold text-[#E84634] dark:text-[#E84634] mb-4">{editingId ? 'Edit Item' : 'Add New Item'}</h2>
             
             {formFeedback && (
               <div className={`p-3.5 rounded-xl text-xs font-medium flex items-center gap-2 mb-4 ${
@@ -423,8 +425,30 @@ export function Admin() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {activeTab === 'portfolio' && (
+                <div className="mb-4">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-2">Space Type</label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setCuratedSpace('verbal'); setFormData({}); setEditingId(null); }}
+                      className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${curatedSpace === 'verbal' ? 'bg-[#E84634] text-white' : 'bg-zinc-100 text-[#E84634] hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800'}`}
+                    >
+                      Verbal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setCuratedSpace('visual'); setFormData({}); setEditingId(null); }}
+                      className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${curatedSpace === 'visual' ? 'bg-[#E84634] text-white' : 'bg-zinc-100 text-[#E84634] hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800'}`}
+                    >
+                      Visual
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Title</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Title</label>
                 <input 
                   type="text" 
                   name="title" 
@@ -436,7 +460,7 @@ export function Admin() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Icon Image (Optional)</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Icon Image (Optional)</label>
                 <div className="flex items-center gap-2">
                   {formData.iconUrl && (
                     <img src={formData.iconUrl} alt="Preview" className="w-8 h-8 object-contain bg-zinc-100 dark:bg-zinc-800 rounded-lg" />
@@ -454,7 +478,7 @@ export function Admin() {
                         reader.readAsDataURL(file);
                       }
                     }}
-                    className="w-full text-xs text-zinc-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-orange-500/10 file:text-orange-600 dark:file:text-orange-400 hover:file:bg-orange-500/20"
+                    className="w-full text-xs text-[#E84634] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-orange-500/10 file:text-orange-600 dark:file:text-orange-400 hover:file:bg-orange-500/20"
                   />
                   {formData.iconUrl && (
                     <button 
@@ -468,10 +492,10 @@ export function Admin() {
                 </div>
               </div>
               
-              {activeTab === 'portfolio' && (
+              {activeTab === 'portfolio' && curatedSpace === 'verbal' && (
                 <>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Date</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Date</label>
                     <input 
                       type="text" 
                       name="date" 
@@ -482,7 +506,7 @@ export function Admin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Category</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Category</label>
                     <input 
                       type="text" 
                       name="category" 
@@ -493,7 +517,7 @@ export function Admin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Project Image (URL or Upload)</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Project Image (URL or Upload)</label>
                     <div className="flex flex-col gap-2">
                       <input 
                         type="url" 
@@ -520,7 +544,7 @@ export function Admin() {
                               reader.readAsDataURL(file);
                             }
                           }}
-                          className="w-full text-xs text-zinc-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-orange-500/10 file:text-orange-600 dark:file:text-orange-400 hover:file:bg-orange-500/20"
+                          className="w-full text-xs text-[#E84634] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-orange-500/10 file:text-orange-600 dark:file:text-orange-400 hover:file:bg-orange-500/20"
                         />
                         {formData.imageUrl && (
                           <button 
@@ -535,7 +559,7 @@ export function Admin() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Description</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Description</label>
                     <textarea 
                       name="description" 
                       value={formData.description || ''} 
@@ -548,10 +572,94 @@ export function Admin() {
                 </>
               )}
 
+              {activeTab === 'portfolio' && curatedSpace === 'visual' && (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Date</label>
+                    <input 
+                      type="text" 
+                      name="date" 
+                      placeholder="e.g. Oct 12, 2026"
+                      value={formData.date || ''} 
+                      onChange={handleInputChange} 
+                      className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Media Type</label>
+                    <select
+                      name="mediaType"
+                      value={formData.mediaType || 'video'}
+                      onChange={handleInputChange}
+                      className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                    >
+                      <option value="video">Video (MP4)</option>
+                      <option value="image">Image (GIF/PNG/JPG)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Media Source (URL or Upload Base64)</label>
+                    <div className="flex flex-col gap-2">
+                      <input 
+                        type="url" 
+                        name="mediaUrl" 
+                        placeholder="e.g. https://.../video.mp4"
+                        value={formData.mediaUrl || ''} 
+                        onChange={handleInputChange} 
+                        required
+                        className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                      />
+                      {formData.mediaUrl && formData.mediaType === 'image' && (
+                        <img src={formData.mediaUrl} alt="Preview" className="w-full h-32 object-cover bg-zinc-100 dark:bg-zinc-800 rounded-xl" />
+                      )}
+                      {formData.mediaUrl && formData.mediaType === 'video' && (
+                        <video src={formData.mediaUrl} className="w-full h-32 object-cover bg-zinc-100 dark:bg-zinc-800 rounded-xl" controls />
+                      )}
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="file"
+                          accept={formData.mediaType === 'video' ? 'video/mp4,video/webm' : 'image/*'}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setFormData({ ...formData, mediaUrl: reader.result as string });
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="w-full text-xs text-[#E84634] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-orange-500/10 file:text-orange-600 dark:file:text-orange-400 hover:file:bg-orange-500/20"
+                        />
+                        {formData.mediaUrl && (
+                          <button 
+                            type="button" 
+                            onClick={() => setFormData({ ...formData, mediaUrl: '' })}
+                            className="text-xs font-medium text-red-500 whitespace-nowrap hover:underline"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Description</label>
+                    <textarea 
+                      name="description" 
+                      value={formData.description || ''} 
+                      onChange={handleInputChange} 
+                      rows={3}
+                      className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all resize-none"
+                    />
+                  </div>
+                </>
+              )}
+
               {activeTab === 'blog' && (
                 <>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Date</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Date</label>
                     <input 
                       type="text" 
                       name="date" 
@@ -563,7 +671,7 @@ export function Admin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Source URL (Optional)</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Source URL (Optional)</label>
                     <input 
                       type="url" 
                       name="url" 
@@ -574,7 +682,7 @@ export function Admin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Content</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Content</label>
                     <textarea 
                       name="content" 
                       value={formData.content || ''} 
@@ -590,7 +698,7 @@ export function Admin() {
               {activeTab === 'media' && (
                 <>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Category</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Category</label>
                     <select 
                       name="category" 
                       value={formData.category || 'video'} 
@@ -603,7 +711,7 @@ export function Admin() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Platform</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Platform</label>
                     <input 
                       type="text" 
                       name="platform" 
@@ -615,7 +723,7 @@ export function Admin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Date</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Date</label>
                     <input 
                       type="text" 
                       name="date" 
@@ -626,7 +734,7 @@ export function Admin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Media Link (URL)</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Media Link (URL)</label>
                     <input 
                       type="url" 
                       name="url" 
@@ -643,7 +751,7 @@ export function Admin() {
                           alt="Thumbnail preview" 
                           className="w-20 aspect-video object-cover rounded-lg border border-zinc-200 dark:border-zinc-800 shrink-0" 
                         />
-                        <div className="text-xs text-zinc-600 dark:text-zinc-400">
+                        <div className="text-xs text-[#E84634] dark:text-[#E84634]">
                           <span className="font-semibold text-orange-600 dark:text-orange-400 block mb-0.5">Thumbnail Auto-Detected</span>
                           <span>Will be displayed subtly on the Media page</span>
                         </div>
@@ -651,7 +759,7 @@ export function Admin() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Thumbnail Image (Optional Override / Upload)</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Thumbnail Image (Optional Override / Upload)</label>
                     <div className="flex flex-col gap-2">
                       <input 
                         type="file"
@@ -666,11 +774,11 @@ export function Admin() {
                             reader.readAsDataURL(file);
                           }
                         }}
-                        className="w-full text-xs text-zinc-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-orange-500/10 file:text-orange-600 dark:file:text-orange-400 hover:file:bg-orange-500/20"
+                        className="w-full text-xs text-[#E84634] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-orange-500/10 file:text-orange-600 dark:file:text-orange-400 hover:file:bg-orange-500/20"
                       />
                       {formData.thumbnailUrl && (
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-zinc-500">Custom image set</span>
+                          <span className="text-xs text-[#E84634]">Custom image set</span>
                           <button 
                             type="button" 
                             onClick={() => setFormData({ ...formData, thumbnailUrl: '' })}
@@ -683,7 +791,7 @@ export function Admin() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Description (Optional)</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Description (Optional)</label>
                     <textarea 
                       name="description" 
                       value={formData.description || ''} 
@@ -698,7 +806,7 @@ export function Admin() {
               {activeTab === 'bookmarks' && (
                 <>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Category</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Category</label>
                     <input 
                       type="text" 
                       name="category" 
@@ -710,7 +818,7 @@ export function Admin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">URL</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">URL</label>
                     <input 
                       type="url" 
                       name="url" 
@@ -746,7 +854,7 @@ export function Admin() {
                   <button 
                     type="button" 
                     onClick={() => { setEditingId(null); setFormData({}); setFormFeedback(null); }} 
-                    className="px-4 py-2.5 bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 rounded-xl font-semibold text-sm transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                    className="px-4 py-2.5 bg-zinc-100 text-[#E84634] dark:bg-zinc-800 dark:text-[#E84634] rounded-xl font-semibold text-sm transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700"
                   >
                     Cancel
                   </button>
@@ -764,7 +872,7 @@ export function Admin() {
           ) : (
             <div className="space-y-3">
               {items.length === 0 ? (
-                <div className="text-center py-12 text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl">
+                <div className="text-center py-12 text-[#E84634] dark:text-[#E84634] bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl">
                   No items found in this section.
                 </div>
               ) : (
@@ -780,10 +888,10 @@ export function Admin() {
                           <img src={mediaThumb} alt="" className="w-14 aspect-video object-cover rounded-lg border border-zinc-200 dark:border-zinc-800 shrink-0" />
                         )}
                         <div className="min-w-0">
-                          <h3 className="font-bold text-base text-zinc-900 dark:text-zinc-100 truncate">{item.title}</h3>
-                          <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 flex-wrap">
+                          <h3 className="font-bold text-base text-[#E84634] dark:text-[#E84634] truncate">{item.title}</h3>
+                          <div className="flex items-center gap-2 text-xs text-[#E84634] dark:text-[#E84634] mt-0.5 flex-wrap">
                             {item.category && <span className="bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-md font-semibold capitalize">{item.category}</span>}
-                            {item.platform && <span className="font-medium text-zinc-600 dark:text-zinc-300">{item.platform}</span>}
+                            {item.platform && <span className="font-medium text-[#E84634] dark:text-[#E84634]">{item.platform}</span>}
                             {item.date && <span>&middot; {item.date}</span>}
                           </div>
                         </div>
@@ -791,7 +899,7 @@ export function Admin() {
                       <div className="flex space-x-2 shrink-0 ml-3">
                         <button 
                           onClick={() => handleEdit(item)}
-                          className="px-3 py-1.5 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-lg text-xs font-semibold transition-colors"
+                          className="px-3 py-1.5 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-[#E84634] dark:text-[#E84634] rounded-lg text-xs font-semibold transition-colors"
                         >
                           Edit
                         </button>
@@ -806,7 +914,7 @@ export function Admin() {
                             </button>
                             <button 
                               onClick={() => setConfirmDeleteId(null)}
-                              className="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded text-xs font-semibold transition-colors"
+                              className="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-800 text-[#E84634] dark:text-[#E84634] rounded text-xs font-semibold transition-colors"
                             >
                               No
                             </button>

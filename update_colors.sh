@@ -1,0 +1,2 @@
+#!/bin/bash
+find src/pages src/components -type f -name "*.tsx" -exec sed -i -e 's/text-zinc-[0-9]\{2,3\}/text-[#E84634]/g' -e 's/dark:text-zinc-[0-9]\{2,3\}/dark:text-[#E84634]/g' -e 's/text-\[#2C241B\]/text-[#E84634]/g' -e 's/dark:text-\[#FDFBF7\]/dark:text-[#E84634]/g' -e 's/text-\[#4A3F35\]/text-[#E84634]/g' -e 's/dark:text-\[#E8E2D9\]/dark:text-[#E84634]/g' -e 's/text-\[#E07A5F\]/text-[#E84634]/g' -e 's/dark:text-\[#E07A5F\]/dark:text-[#E84634]/g' -e 's/text-\[#FDFBF7\]/text-[#E84634]/g' {} +

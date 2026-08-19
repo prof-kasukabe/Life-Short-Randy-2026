@@ -154,11 +154,11 @@ export function DitherTool() {
       </Helmet>
 
       <div className="mb-16">
-        <span className="text-xs font-bold uppercase tracking-widest text-[#E07A5F] dark:text-[#E07A5F] mb-4 block">Visual Creative Coding</span>
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] leading-tight flex items-center gap-4">
+        <span className="text-xs font-bold uppercase tracking-widest text-[#E84634] dark:text-[#E84634] mb-4 block">Visual Creative Coding</span>
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#E84634] dark:text-[#E84634] leading-tight flex items-center gap-4">
           Dither Tool
         </h1>
-        <p className="text-xl text-[#4A3F35] dark:text-[#E8E2D9] font-light max-w-2xl leading-relaxed">
+        <p className="text-xl text-[#E84634] dark:text-[#E84634] font-light max-w-2xl leading-relaxed">
           Convert your images into pure 1-bit black and white using classic computer graphics algorithms like Atkinson and Floyd-Steinberg.
         </p>
       </div>
@@ -167,7 +167,7 @@ export function DitherTool() {
         {/* Controls Sidebar */}
         <div className="lg:col-span-4 space-y-8 bg-zinc-50 dark:bg-zinc-900 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800">
           <div>
-            <h3 className="text-sm font-semibold tracking-wide uppercase text-zinc-500 dark:text-zinc-400 mb-4">Algorithm</h3>
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-[#E84634] dark:text-[#E84634] mb-4">Algorithm</h3>
             <div className="space-y-2">
               {[
                 { id: 'atkinson', label: 'Atkinson (Macintosh)' },
@@ -179,8 +179,8 @@ export function DitherTool() {
                   onClick={() => setAlgorithm(algo.id as DitherAlgorithm)}
                   className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-all ${
                     algorithm === algo.id
-                      ? 'bg-[#E07A5F] text-[#FDFBF7] font-medium'
-                      : 'bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700'
+                      ? 'bg-[#E07A5F] text-[#E84634] font-medium'
+                      : 'bg-white dark:bg-zinc-800 text-[#E84634] dark:text-[#E84634] hover:bg-zinc-100 dark:hover:bg-zinc-700'
                   }`}
                 >
                   {algo.label}
@@ -191,8 +191,8 @@ export function DitherTool() {
 
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-sm font-semibold tracking-wide uppercase text-zinc-500 dark:text-zinc-400">Threshold</h3>
-              <span className="text-xs text-zinc-400 font-mono">{threshold}</span>
+              <h3 className="text-sm font-semibold tracking-wide uppercase text-[#E84634] dark:text-[#E84634]">Threshold</h3>
+              <span className="text-xs text-[#E84634] font-mono">{threshold}</span>
             </div>
             <input
               type="range"
@@ -206,8 +206,8 @@ export function DitherTool() {
 
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-sm font-semibold tracking-wide uppercase text-zinc-500 dark:text-zinc-400">Contrast</h3>
-              <span className="text-xs text-zinc-400 font-mono">{contrast.toFixed(1)}x</span>
+              <h3 className="text-sm font-semibold tracking-wide uppercase text-[#E84634] dark:text-[#E84634]">Contrast</h3>
+              <span className="text-xs text-[#E84634] font-mono">{contrast.toFixed(1)}x</span>
             </div>
             <input
               type="range"
@@ -230,7 +230,7 @@ export function DitherTool() {
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-lg text-sm font-medium hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-zinc-200 dark:bg-zinc-800 text-[#E84634] dark:text-[#E84634] rounded-lg text-sm font-medium hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
             >
               <Upload size={16} /> Select Image
             </button>
@@ -239,8 +239,8 @@ export function DitherTool() {
               disabled={!image}
               className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                 image
-                  ? 'bg-[#2C241B] dark:bg-[#FDFBF7] text-[#FDFBF7] dark:text-[#2C241B] hover:bg-zinc-800 dark:hover:bg-zinc-200'
-                  : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed'
+                  ? 'bg-[#2C241B] dark:bg-[#FDFBF7] text-[#E84634] dark:text-[#E84634] hover:bg-zinc-800 dark:hover:bg-zinc-200'
+                  : 'bg-zinc-200 dark:bg-zinc-800 text-[#E84634] cursor-not-allowed'
               }`}
             >
               <Download size={16} /> Download Result
@@ -251,7 +251,7 @@ export function DitherTool() {
         {/* Canvas Area */}
         <div className="lg:col-span-8 flex flex-col items-center justify-center bg-zinc-100 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-800 min-h-[400px] lg:min-h-[600px] overflow-hidden relative group">
           {!image && (
-            <div className="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            <div className="flex flex-col items-center justify-center text-[#E84634] dark:text-[#E84634] cursor-pointer" onClick={() => fileInputRef.current?.click()}>
               <ImageIcon size={48} className="mb-4 opacity-50" />
               <p className="text-sm font-medium">Click or drag image to start</p>
             </div>
@@ -265,7 +265,7 @@ export function DitherTool() {
 
           {isProcessing && (
             <div className="absolute inset-0 flex items-center justify-center bg-white/20 dark:bg-black/20 backdrop-blur-sm">
-              <RefreshCw className="animate-spin text-[#E07A5F]" size={32} />
+              <RefreshCw className="animate-spin text-[#E84634]" size={32} />
             </div>
           )}
         </div>

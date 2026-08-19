@@ -49,10 +49,10 @@ export function Media() {
           </div>
         </div>
         <div className="max-w-3xl">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] leading-tight flex items-center gap-4">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#E84634] dark:text-[#E84634] leading-tight flex items-center gap-4">
             Watch &amp; Listen
           </h1>
-          <p className="text-xl text-zinc-600 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
+          <p className="text-xl text-[#E84634] dark:text-[#E84634] font-light max-w-xl leading-relaxed">
             My curated list of podcasts, talks, and YouTube videos.
           </p>
         </div>
@@ -61,20 +61,20 @@ export function Media() {
       <div className="flex gap-3 mb-16 border-b border-zinc-200/50 dark:border-zinc-800/50 pb-4 overflow-x-auto">
         <button 
           onClick={() => setFilter('all')}
-          className={`text-sm font-medium transition-all px-1 border-b-2 whitespace-nowrap -mb-[18px] ${filter === 'all' ? 'border-orange-500 text-zinc-900 dark:text-zinc-50' : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50'}`}
+          className={`text-sm font-medium transition-all px-1 border-b-2 whitespace-nowrap -mb-[18px] ${filter === 'all' ? 'border-orange-500 text-[#E84634] dark:text-[#E84634]' : 'border-transparent text-[#E84634] hover:text-[#E84634] dark:text-[#E84634] dark:hover:text-[#E84634]'}`}
         >
           All
         </button>
         <button 
           onClick={() => setFilter('video')}
-          className={`text-sm font-medium transition-all px-1 border-b-2 whitespace-nowrap flex items-center gap-1.5 -mb-[18px] ${filter === 'video' ? 'border-orange-500 text-zinc-900 dark:text-zinc-50' : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50'}`}
+          className={`text-sm font-medium transition-all px-1 border-b-2 whitespace-nowrap flex items-center gap-1.5 -mb-[18px] ${filter === 'video' ? 'border-orange-500 text-[#E84634] dark:text-[#E84634]' : 'border-transparent text-[#E84634] hover:text-[#E84634] dark:text-[#E84634] dark:hover:text-[#E84634]'}`}
         >
           <Tv size={14} />
           Videos
         </button>
         <button 
           onClick={() => setFilter('audio')}
-          className={`text-sm font-medium transition-all px-1 border-b-2 whitespace-nowrap flex items-center gap-1.5 -mb-[18px] ${filter === 'audio' ? 'border-orange-500 text-zinc-900 dark:text-zinc-50' : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50'}`}
+          className={`text-sm font-medium transition-all px-1 border-b-2 whitespace-nowrap flex items-center gap-1.5 -mb-[18px] ${filter === 'audio' ? 'border-orange-500 text-[#E84634] dark:text-[#E84634]' : 'border-transparent text-[#E84634] hover:text-[#E84634] dark:text-[#E84634] dark:hover:text-[#E84634]'}`}
         >
           <Headphones size={14} />
           Audio
@@ -88,7 +88,7 @@ export function Media() {
           ))}
         </div>
       ) : filteredMedia.length === 0 ? (
-        <p className="text-zinc-500 dark:text-zinc-400 font-light">No media items found in this category.</p>
+        <p className="text-[#E84634] dark:text-[#E84634] font-light">No media items found in this category.</p>
       ) : (
         <div className="grid gap-12 sm:grid-cols-2 lg:gap-16">
           {filteredMedia.map((item) => {
@@ -120,16 +120,16 @@ export function Media() {
                   )}
                   <div className="flex-1 min-w-0 w-full">
                     <div className="flex justify-between items-start gap-2 mb-1">
-                      <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-orange-500 transition-colors leading-snug">{item.title}</h3>
-                      <ExternalLink size={16} className="text-zinc-300 dark:text-zinc-700 group-hover:text-orange-500 transition-colors shrink-0 mt-1" />
+                      <h3 className="text-lg font-medium text-[#E84634] dark:text-[#E84634] group-hover:text-orange-500 transition-colors leading-snug">{item.title}</h3>
+                      <ExternalLink size={16} className="text-[#E84634] dark:text-[#E84634] group-hover:text-orange-500 transition-colors shrink-0 mt-1" />
                     </div>
-                    <div className="flex items-center gap-2 mb-2 text-sm text-zinc-500 dark:text-zinc-400">
+                    <div className="flex items-center gap-2 mb-2 text-sm text-[#E84634] dark:text-[#E84634]">
                       <span className="capitalize">{item.category || 'video'}</span>
-                      <span className="text-zinc-300 dark:text-zinc-700">&middot;</span>
+                      <span className="text-[#E84634] dark:text-[#E84634]">&middot;</span>
                       <span>{item.platform}</span>
                     </div>
                     {item.description && (
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed">{item.description}</p>
+                      <p className="text-sm text-[#E84634] dark:text-[#E84634] line-clamp-2 leading-relaxed">{item.description}</p>
                     )}
                   </div>
                 </div>

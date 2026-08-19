@@ -74,11 +74,11 @@ export function Bookmarks() {
           </div>
         </div>
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-[#E07A5F] dark:text-[#E07A5F] mb-2 block">Resource Directory</span>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-[#2C241B] dark:text-[#FDFBF7] flex items-center gap-3">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#E84634] dark:text-[#E84634] mb-2 block">Resource Directory</span>
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-[#E84634] dark:text-[#E84634] flex items-center gap-3">
             My {totalBookmarks} Bookmarks
           </h1>
-          <p className="text-lg sm:text-xl text-zinc-600 dark:text-zinc-400">
+          <p className="text-lg sm:text-xl text-[#E84634] dark:text-[#E84634]">
             On AI Research, Business, Software, and Digital Media
           </p>
         </div>
@@ -86,7 +86,7 @@ export function Bookmarks() {
 
       <div className="mb-8 relative">
         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-          <Search size={18} className="text-zinc-400" />
+          <Search size={18} className="text-[#E84634]" />
         </div>
         <input
           type="text"
@@ -104,7 +104,7 @@ export function Bookmarks() {
           ))}
         </div>
       ) : Object.keys(bookmarksByCategory).length === 0 ? (
-        <p className="text-zinc-500 dark:text-zinc-400">No bookmarks found.</p>
+        <p className="text-[#E84634] dark:text-[#E84634]">No bookmarks found.</p>
       ) : (
         <div className="space-y-4">
           {(Object.entries(bookmarksByCategory) as [string, BookmarkItem[]][]).sort(([a], [b]) => a.localeCompare(b)).map(([category, items]) => (
@@ -114,10 +114,10 @@ export function Bookmarks() {
                 className="w-full flex items-center justify-between py-2 text-left group"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{category}</span>
+                  <span className="text-lg font-bold text-[#E84634] dark:text-[#E84634] group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{category}</span>
                   <span className="text-orange-600 dark:text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full text-xs font-semibold">({items.length})</span>
                 </div>
-                <div className="text-zinc-400 group-hover:text-orange-500 transition-colors">
+                <div className="text-[#E84634] group-hover:text-orange-500 transition-colors">
                   {expandedCategories[category] ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                 </div>
               </button>
@@ -132,10 +132,10 @@ export function Bookmarks() {
                       rel="noopener noreferrer"
                       className="block group p-2.5 rounded-lg hover:bg-zinc-100/60 dark:hover:bg-zinc-900/60 transition-all"
                     >
-                      <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors text-sm">
+                      <h3 className="font-semibold text-[#E84634] dark:text-[#E84634] group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors text-sm">
                         {item.title}
                       </h3>
-                      <p className="text-xs text-zinc-500 truncate mt-1">
+                      <p className="text-xs text-[#E84634] truncate mt-1">
                         {item.url}
                       </p>
                     </a>

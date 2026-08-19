@@ -43,24 +43,24 @@ export function Contact() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-[#E07A5F] dark:text-[#E07A5F] mb-2 block">Get in Touch</span>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 text-[#2C241B] dark:text-[#FDFBF7] flex items-center gap-3">
-            <Mail className="text-[#E07A5F]" size={40} />
-            Let's Connect<span className="text-[#E07A5F]">.</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-[#E84634] dark:text-[#E84634] mb-2 block">Get in Touch</span>
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 text-[#E84634] dark:text-[#E84634] flex items-center gap-3">
+            <Mail className="text-[#E84634]" size={40} />
+            Let's Connect<span className="text-[#E84634]">.</span>
           </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-12 max-w-md leading-relaxed">
+          <p className="text-lg text-[#E84634] dark:text-[#E84634] mb-12 max-w-md leading-relaxed">
             I'm currently open for interesting collaborations, web projects, or technical conversations. 
             Send a note and I'll respond as soon as possible!
           </p>
 
           <div className="space-y-6 mb-12">
-            <div className="flex items-center gap-4 text-zinc-600 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors group">
+            <div className="flex items-center gap-4 text-[#E84634] dark:text-[#E84634] hover:text-orange-600 dark:hover:text-orange-400 transition-colors group">
               <div className="p-3 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-full">
                 <Mail size={20} />
               </div>
               <a href="mailto:randyeef00@gmail.com" className="text-lg font-medium">randyeef00@gmail.com</a>
             </div>
-            <div className="flex items-center gap-4 text-zinc-600 dark:text-zinc-400">
+            <div className="flex items-center gap-4 text-[#E84634] dark:text-[#E84634]">
               <div className="p-3 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-full">
                 <MapPin size={20} />
               </div>
@@ -69,15 +69,15 @@ export function Contact() {
           </div>
 
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-4">Follow &amp; Join</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-4">Follow &amp; Join</h2>
             <div className="flex gap-3">
-              <a href="#" className="p-3 bg-zinc-100 dark:bg-zinc-900/80 rounded-full hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-800/60">
+              <a href="#" className="p-3 bg-zinc-100 dark:bg-zinc-900/80 rounded-full hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all text-[#E84634] dark:text-[#E84634] border border-zinc-200/60 dark:border-zinc-800/60">
                 <Twitter size={18} />
               </a>
-              <a href="#" className="p-3 bg-zinc-100 dark:bg-zinc-900/80 rounded-full hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-800/60">
+              <a href="#" className="p-3 bg-zinc-100 dark:bg-zinc-900/80 rounded-full hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all text-[#E84634] dark:text-[#E84634] border border-zinc-200/60 dark:border-zinc-800/60">
                 <Github size={18} />
               </a>
-              <a href="#" className="p-3 bg-zinc-100 dark:bg-zinc-900/80 rounded-full hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-800/60">
+              <a href="#" className="p-3 bg-zinc-100 dark:bg-zinc-900/80 rounded-full hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all text-[#E84634] dark:text-[#E84634] border border-zinc-200/60 dark:border-zinc-800/60">
                 <Linkedin size={18} />
               </a>
             </div>
@@ -85,10 +85,10 @@ export function Contact() {
         </div>
 
         <div className="bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-8 lg:p-10 shadow-sm">
-          <h2 className="text-2xl font-bold tracking-tight mb-8 text-zinc-900 dark:text-zinc-50">Send a Message</h2>
+          <h2 className="text-2xl font-bold tracking-tight mb-8 text-[#E84634] dark:text-[#E84634]">Send a Message</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">Name</label>
+              <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-2">Name</label>
               <input
                 type="text"
                 id="name"
@@ -98,7 +98,7 @@ export function Contact() {
               />
             </div>
             <div>
-              <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">Email</label>
+              <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-2">Email</label>
               <input
                 type="email"
                 id="email"
@@ -108,7 +108,7 @@ export function Contact() {
               />
             </div>
             <div>
-              <label htmlFor="message" className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">Message</label>
+              <label htmlFor="message" className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-2">Message</label>
               <textarea
                 id="message"
                 required
