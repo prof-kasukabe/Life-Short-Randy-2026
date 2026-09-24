@@ -47,3 +47,22 @@ export interface VisualItem {
   date?: string;
   createdAt?: any;
 }
+
+export interface ITProject {
+  id: string;
+  title: string;
+  tagline: string;
+  description: string;
+  category: 'Full-Stack' | 'Frontend' | 'Backend & API' | 'AI & Machine Learning' | 'DevOps & Cloud' | 'Mobile App' | string;
+  status: 'in_progress' | 'completed';
+  progressPercentage?: number;
+  techStack: string[];
+  features?: string[];
+  imageUrl?: string;
+  demoUrl?: string;
+  githubUrl?: string;
+  timeline?: string;
+  architectureSummary?: string;
+  featured?: boolean;
+  createdAt?: any;
+}

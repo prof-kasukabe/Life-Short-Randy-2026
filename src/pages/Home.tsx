@@ -1,9 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Tv, Headphones, ExternalLink, MapPin, Sparkles, Compass, Shield } from 'lucide-react';
+import { 
+  ArrowRight, 
+  ExternalLink, 
+  Sparkles, 
+  Compass, 
+  Code2, 
+  Layers, 
+  CheckCircle2, 
+  Clock, 
+  Cpu, 
+  Database, 
+  Terminal, 
+  ArrowUpRight,
+  ShieldCheck
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { collection, getDocs, limit, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { PortfolioItem, BlogPost, MediaItem } from '../types';
+import { PortfolioItem, BlogPost, MediaItem, ITProject } from '../types';
+import { itProjectsData } from '../data';
 import { Helmet } from 'react-helmet-async';
 import { getMediaThumbnail } from '../lib/media';
 import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
@@ -21,6 +36,7 @@ export function Home() {
   const [featuredWorks, setFeaturedWorks] = useState<PortfolioItem[]>([]);
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [recentMedia, setRecentMedia] = useState<MediaItem[]>([]);
+  const [itProjects, setItProjects] = useState<ITProject[]>(itProjectsData);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,6 +52,14 @@ export function Home() {
         const mediaSnapshot = await getDocs(query(collection(db, 'media'), orderBy('createdAt', 'desc'), limit(2)));
         const media = mediaSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as MediaItem[];
         setRecentMedia(media);
+
+        // Fetch IT projects from Firestore if available
+        const itSnap = await getDocs(collection(db, 'it_projects'));
+        if (!itSnap.empty) {
+          const dbProjects = itSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ITProject[];
+          const existingIds = new Set(dbProjects.map(p => p.id));
+          setItProjects([...dbProjects, ...itProjectsData.filter(p => !existingIds.has(p.id))]);
+        }
       } catch (error) {
         console.error("Error fetching home data:", error);
       }
@@ -43,56 +67,75 @@ export function Home() {
     fetchData();
   }, []);
 
+  const ongoingProjects = itProjects.filter(p => p.status === 'in_progress').slice(0, 2);
+  const completedProjects = itProjects.filter(p => p.status === 'completed').slice(0, 2);
+
   return (
     <div className="flex flex-col min-h-screen">
       <Helmet>
-        <title>Randy | Minimalist Portfolio</title>
-        <meta name="description" content="I'm Randy. Curious explorer of the endless web, constantly seeking new knowledge." />
+        <title>Randy | Software Engineer &amp; Digital Realist</title>
+        <meta name="description" content="Randy Ardiansyah — Software Engineer & digital realist crafting full-stack web architectures, AI integrations, and high-performance digital systems." />
       </Helmet>
+
       {/* Hero Section */}
       <section className="pt-20 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full flex flex-col items-center text-center">
           
-          <h1 className="text-[12vw] sm:text-[9vw] lg:text-[140px] font-serif-display font-bold tracking-tighter text-[#E84634] mb-4 leading-[0.9] w-full text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 border border-[#E0DACE] dark:border-[#3A332E] text-xs font-mono font-semibold text-[#E84634] mb-6">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Available for High-Impact Software &amp; IT Engineering
+          </div>
+
+          <h1 className="text-[12vw] sm:text-[9vw] lg:text-[130px] font-serif-display font-bold tracking-tighter text-[#E84634] mb-4 leading-[0.9] w-full text-center">
             The Late 20s
           </h1>
           
-          <p className="text-xs sm:text-sm md:text-base font-sans-clean font-bold uppercase tracking-[0.2em] text-[#E84634] max-w-3xl leading-relaxed mb-12 px-4 flex flex-col items-center gap-3">
-            <span>Many bask in the sunlight, but only a few endure the metamorphosis. Diving deeper into the process, embracing the discomfort, and bending fate—that is the true key to creating a masterpiece</span>
-            <span className="opacity-70 text-[10px] sm:text-xs tracking-[0.3em]">Visual &middot; Coding &middot; Verbal</span>
+          <p className="text-sm sm:text-base md:text-lg font-sans-clean font-bold uppercase tracking-[0.18em] text-[#E84634] max-w-3xl leading-relaxed mb-6 px-4">
+            Diving deeper into the process, embracing the discomfort, and bending fate to create meaningful digital systems.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4 mb-10 px-4">
+          <p className="text-xs sm:text-sm text-[#E84634]/80 max-w-2xl leading-relaxed mb-10 px-4">
+            Software Engineer &amp; Digital Realist. Integrating modern full-stack frameworks, AI workflow engines, and deliberate interactive interfaces.
+          </p>
+
+          {/* Quick Action Navigation */}
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-10 px-4">
+            <Link 
+              to="/projects" 
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#E84634] text-white hover:opacity-90 font-bold uppercase tracking-widest text-xs sm:text-sm rounded-full transition-all shadow-md hover:shadow-lg"
+            >
+              <Code2 size={16} />
+              Lihat Proyek TI
+            </Link>
+            <Link 
+              to="/curated" 
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-[#E84634] text-[#E84634] hover:bg-[#E84634] hover:text-white font-bold uppercase tracking-widest text-xs sm:text-sm rounded-full transition-colors"
+            >
+              <Layers size={16} />
+              Curated Space
+            </Link>
             <Link 
               to="/tools/dither" 
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-[#E84634] text-[#E84634] hover:bg-[#E84634] hover:text-[#FDFBF7] dark:hover:text-[#1E1A18] font-bold uppercase tracking-widest text-xs sm:text-sm rounded-full transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 border border-[#E0DACE] dark:border-[#3A332E] text-[#E84634] hover:border-[#E84634] font-semibold uppercase tracking-wider text-xs rounded-full transition-colors"
             >
-              <Sparkles size={16} />
+              <Sparkles size={15} />
               Dither Tool
             </Link>
             <Link 
               to="/tools/scratch" 
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-[#E84634] text-[#E84634] hover:bg-[#E84634] hover:text-[#FDFBF7] dark:hover:text-[#1E1A18] font-bold uppercase tracking-widest text-xs sm:text-sm rounded-full transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 border border-[#E0DACE] dark:border-[#3A332E] text-[#E84634] hover:border-[#E84634] font-semibold uppercase tracking-wider text-xs rounded-full transition-colors"
             >
-              <Compass size={16} />
-              Visual Creative Scratch
+              <Compass size={15} />
+              Creative Scratch
             </Link>
-            <a 
-              href="https://scrapbox.io/WarenBergg1995/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-[#E84634] text-[#E84634] hover:bg-[#E84634] hover:text-[#FDFBF7] dark:hover:text-[#1E1A18] font-bold uppercase tracking-widest text-xs sm:text-sm rounded-full transition-colors"
-            >
-              <ExternalLink size={16} />
-              Scrapbox
-            </a>
           </div>
 
+          {/* Spotify Widget */}
           <a 
             href="https://open.spotify.com/playlist/4RflVxxz20wZ6RKGvVItp5?si=JUVlCAjzQ6ew20AQH2H7Wg"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full max-w-[340px] mx-auto mb-16 flex items-center justify-between p-2 border border-[#E0DACE] dark:border-[#3A332E] hover:border-[#E84634]/50 dark:hover:border-[#E84634]/50 bg-white/50 dark:bg-[#1E1A18]/50 backdrop-blur-sm rounded-2xl transition-all shadow-sm group overflow-hidden"
+            className="w-full max-w-[340px] mx-auto mb-14 flex items-center justify-between p-2.5 border border-[#E0DACE] dark:border-[#3A332E] hover:border-[#E84634]/60 bg-white/60 dark:bg-[#1E1A18]/60 backdrop-blur-md rounded-2xl transition-all shadow-sm group overflow-hidden"
           >
             <div className="flex flex-col text-left pl-3 py-1">
               <div className="flex items-center gap-1.5 mb-1">
@@ -102,7 +145,7 @@ export function Home() {
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[#E84634]/70">Spotify</span>
               </div>
               <span className="text-lg font-serif-display font-bold text-[#E84634] leading-none mb-1">Late20s</span>
-              <span className="text-[11px] text-[#E84634]/60 font-medium">by Randy Ardiansyah</span>
+              <span className="text-[11px] text-[#E84634]/60 font-medium">Curated by Randy</span>
             </div>
             <div className="w-[72px] h-[72px] shrink-0 rounded-[10px] overflow-hidden border border-[#E0DACE]/50 dark:border-[#3A332E]/50">
               <img 
@@ -113,28 +156,260 @@ export function Home() {
             </div>
           </a>
 
-          <div className="w-full aspect-[4/3] sm:aspect-video rounded-[2rem] overflow-hidden relative shadow-lg">
+          {/* Visual Showcase Banner */}
+          <div className="w-full aspect-[4/3] sm:aspect-video rounded-[2rem] overflow-hidden relative shadow-xl border border-[#E0DACE]/80 dark:border-[#3A332E]/80">
             <img 
               src={kudoGhibliImg} 
-              alt="My photo" 
+              alt="Randy Ghibli Aesthetic" 
               className="w-full h-full object-cover" 
             />
           </div>
         </div>
       </section>
 
-      {/* Featured Work */}
+      {/* FEATURED IT PROJECTS SECTION (Highlighting Ongoing & Completed) */}
+      <section className="py-24 border-t border-[#E0DACE] dark:border-[#3A332E] bg-[#E0DACE]/10 dark:bg-[#2C241B]/15">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 px-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2 text-xs font-mono font-bold uppercase tracking-widest text-[#E84634]">
+                <Code2 size={16} />
+                <span>Teknologi Informasi &amp; Rekayasa Sistem</span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">
+                Featured IT Projects<span className="text-[#E84634]">.</span>
+              </h2>
+              <p className="text-sm sm:text-base text-[#E84634]/80 mt-2 max-w-xl font-light">
+                Sorotan inisiatif perangkat lunak aktif dan sistem komputasi terdistribusi yang telah selesai diimplementasikan.
+              </p>
+            </div>
+            <Link 
+              to="/projects" 
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E84634] hover:opacity-75 transition-opacity pb-1 border-b-2 border-[#E84634]"
+            >
+              <span>Buka Halaman Proyek TI Lengkap ({itProjects.length})</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
+            {/* Ongoing Projects Spotlight */}
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between pb-2 border-b border-[#E0DACE] dark:border-[#3A332E]">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                  </span>
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                    Sedang Dikerjakan (In Progress)
+                  </span>
+                </div>
+                <span className="text-xs font-medium text-[#E84634]/60">Fase Pengembangan</span>
+              </div>
+
+              {ongoingProjects.map((p) => (
+                <div 
+                  key={p.id}
+                  className="bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E] hover:border-[#E84634]/60 rounded-2xl p-6 transition-all shadow-sm flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <span className="font-semibold text-[#E84634]/80">{p.category}</span>
+                      <span className="font-mono text-[#E84634]/60">{p.timeline}</span>
+                    </div>
+
+                    <h3 className="text-xl font-serif-display font-bold text-[#E84634] mb-2 leading-tight">
+                      {p.title}
+                    </h3>
+                    <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] line-clamp-3 mb-4 leading-relaxed">
+                      {p.description}
+                    </p>
+
+                    {p.progressPercentage && (
+                      <div className="mb-4">
+                        <div className="flex justify-between text-[11px] font-semibold text-amber-700 dark:text-amber-300 mb-1">
+                          <span>Progress</span>
+                          <span>{p.progressPercentage}%</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-amber-500/20 rounded-full overflow-hidden">
+                          <div className="h-full bg-amber-500 rounded-full" style={{ width: `${p.progressPercentage}%` }} />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {p.techStack.slice(0, 4).map((tech) => (
+                        <span key={tech} className="px-2 py-0.5 text-[11px] font-mono rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Link 
+                    to="/projects" 
+                    className="text-xs font-bold uppercase tracking-wider text-[#E84634] hover:underline flex items-center gap-1 pt-3 border-t border-[#E0DACE]/60 dark:border-[#3A332E]/60"
+                  >
+                    Pelajari Selengkapnya <ArrowUpRight size={13} />
+                  </Link>
+                </div>
+              ))}
+            </div>
+
+            {/* Completed Projects Spotlight */}
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between pb-2 border-b border-[#E0DACE] dark:border-[#3A332E]">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-emerald-500" />
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                    Selesai Dikerjakan (Delivered)
+                  </span>
+                </div>
+                <span className="text-xs font-medium text-[#E84634]/60">Produksi &amp; Rilis</span>
+              </div>
+
+              {completedProjects.map((p) => (
+                <div 
+                  key={p.id}
+                  className="bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E] hover:border-[#E84634]/60 rounded-2xl p-6 transition-all shadow-sm flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <span className="font-semibold text-[#E84634]/80">{p.category}</span>
+                      <span className="font-mono text-[#E84634]/60">{p.timeline}</span>
+                    </div>
+
+                    <h3 className="text-xl font-serif-display font-bold text-[#E84634] mb-2 leading-tight">
+                      {p.title}
+                    </h3>
+                    <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] line-clamp-3 mb-4 leading-relaxed">
+                      {p.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {p.techStack.slice(0, 4).map((tech) => (
+                        <span key={tech} className="px-2 py-0.5 text-[11px] font-mono rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Link 
+                    to="/projects" 
+                    className="text-xs font-bold uppercase tracking-wider text-[#E84634] hover:underline flex items-center gap-1 pt-3 border-t border-[#E0DACE]/60 dark:border-[#3A332E]/60"
+                  >
+                    Cek Arsitektur &amp; Demo <ArrowUpRight size={13} />
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TECHNICAL COMPETENCIES / CORE ARCHITECTURE */}
+      <section className="py-20 border-t border-[#E0DACE] dark:border-[#3A332E]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full">
+          <div className="max-w-2xl mb-12 px-4">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#E84634] block mb-2">
+              Kemampuan Teknis &amp; Rekayasa
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-serif-display font-bold tracking-tight text-[#E84634]">
+              Core Technical Competencies
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+            <div className="p-6 rounded-2xl bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E]">
+              <div className="flex items-center gap-2 mb-3 text-[#E84634]">
+                <Cpu size={18} />
+                <h3 className="font-serif-display font-bold text-base">Frontend Architecture</h3>
+              </div>
+              <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] leading-relaxed mb-4">
+                High-performance SPAs and SSR apps with typed interfaces, accessible components, and smooth 60fps canvas graphics.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {['React 19', 'TypeScript', 'Tailwind', 'Next.js', 'Canvas API'].map(t => (
+                  <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E]">
+              <div className="flex items-center gap-2 mb-3 text-[#E84634]">
+                <Terminal size={18} />
+                <h3 className="font-serif-display font-bold text-base">Backend &amp; Microservices</h3>
+              </div>
+              <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] leading-relaxed mb-4">
+                Scalable REST, gRPC, and WebSocket backends designed with rate-limiting, modular service boundaries, and caching.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {['Node.js', 'Python FastAPI', 'Go (Golang)', 'Express', 'Redis'].map(t => (
+                  <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E]">
+              <div className="flex items-center gap-2 mb-3 text-[#E84634]">
+                <Database size={18} />
+                <h3 className="font-serif-display font-bold text-base">Databases &amp; Cloud</h3>
+              </div>
+              <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] leading-relaxed mb-4">
+                Relational schema modeling, real-time NoSQL synchronization, time-series telemetry storage, and containerization.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {['PostgreSQL', 'TimescaleDB', 'Firestore', 'Docker', 'Git/CI'].map(t => (
+                  <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E]">
+              <div className="flex items-center gap-2 mb-3 text-[#E84634]">
+                <ShieldCheck size={18} />
+                <h3 className="font-serif-display font-bold text-base">AI &amp; Zero-Trust</h3>
+              </div>
+              <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] leading-relaxed mb-4">
+                Integrating multimodal LLMs into operational workflows, WebAuthn biometrics, and secure RBAC policy layers.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {['Gemini SDK', 'WebAuthn', 'JWT Auth', 'Prompt Eng', 'RBAC'].map(t => (
+                  <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Editorial Work (Curated Journal) */}
       <section className="py-24 border-t border-[#E0DACE] dark:border-[#3A332E]">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full">
-          <div className="flex flex-col md:flex-row md:items-end gap-4 mb-16 px-4">
-            <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">curated</h2>
-            <p className="text-[#E84634] font-medium italic pb-1">A selection of stories and visual projects crafted carefully over time.</p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-16 px-4">
+            <div>
+              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">Curated Space</h2>
+              <p className="text-[#E84634] font-medium italic pb-1">A selection of stories and visual projects crafted carefully over time.</p>
+            </div>
+            <Link to="/curated" className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E84634] hover:opacity-75 transition-opacity">
+              Lihat Semua Galeri &rarr;
+            </Link>
           </div>
           
-          <div className="flex overflow-x-auto gap-6 lg:gap-8 pb-12 snap-x px-4 [&::-webkit-scrollbar]:hidden">
+          <div className="flex overflow-x-auto gap-6 lg:gap-8 pb-8 snap-x px-4 [&::-webkit-scrollbar]:hidden">
             {featuredWorks.length > 0 ? featuredWorks.map((work) => (
               <Link key={work.id} to="/curated" className="group block shrink-0 snap-start w-[280px] sm:w-[320px]">
-                <div className="aspect-[3/4] overflow-hidden bg-zinc-100 dark:bg-zinc-900 mb-6 relative rounded-[1.5rem] shadow-sm">
+                <div className="aspect-[3/4] overflow-hidden bg-zinc-100 dark:bg-zinc-900 mb-5 relative rounded-[1.5rem] shadow-sm">
                   <img
                     src={work.imageUrl}
                     alt={work.title}
@@ -152,7 +427,6 @@ export function Home() {
                 </div>
               </Link>
             )) : (
-              // Fallback content if database is empty to match the screenshot
               <>
                 <div className="group block shrink-0 snap-start w-[280px] sm:w-[320px]">
                   <div className="aspect-[3/4] overflow-hidden relative rounded-[1.5rem] shadow-sm mb-4">
@@ -172,53 +446,25 @@ export function Home() {
                   </div>
                   <h3 className="text-xs font-bold uppercase tracking-widest text-[#E84634] text-center leading-relaxed">A September In Sicily For The Couple Who Love Long Dinners</h3>
                 </div>
-                <div className="group block shrink-0 snap-start w-[280px] sm:w-[320px]">
-                  <div className="aspect-[3/4] overflow-hidden relative rounded-[1.5rem] shadow-sm mb-4">
-                    <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover" />
-                  </div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#E84634] text-center leading-relaxed">Finding Solitude Along The Ancient Trails Of Kyoto</h3>
-                </div>
-                <div className="group block shrink-0 snap-start w-[280px] sm:w-[320px]">
-                  <div className="aspect-[3/4] overflow-hidden relative rounded-[1.5rem] shadow-sm mb-4">
-                    <img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover" />
-                  </div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#E84634] text-center leading-relaxed">Wandering Through The Hidden Markets Of Marrakech</h3>
-                </div>
-                <div className="group block shrink-0 snap-start w-[280px] sm:w-[320px]">
-                  <div className="aspect-[3/4] overflow-hidden relative rounded-[1.5rem] shadow-sm mb-4">
-                    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover" />
-                  </div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#E84634] text-center leading-relaxed">A Weekend Escape To The Untamed Coastlines Of Maine</h3>
-                </div>
               </>
             )}
-          </div>
-          
-          <div className="mt-8 text-center flex items-center justify-between px-4">
-            <Link to="/curated" className="inline-flex mx-auto text-sm font-medium tracking-widest uppercase text-[#E84634] hover:opacity-70 transition-opacity">
-              view journal
-            </Link>
-            <div className="flex gap-2 text-[#E84634] font-bold">
-              <span>←</span>
-              <span>→</span>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Recent Posts */}
+      {/* Recent Posts / Reading List */}
       <section className="py-24 border-t border-[#E0DACE] dark:border-[#3A332E]">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
-           <div className="flex justify-between items-end mb-16">
+          <div className="flex justify-between items-end mb-16">
             <div>
-              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">recent journal</h2>
+              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">Reading List</h2>
             </div>
             <Link to="/blog" className="hidden sm:inline-flex items-center text-sm font-bold uppercase tracking-widest text-[#E84634] hover:opacity-70 transition-colors">
-              view all
+              Lihat Semua Tulisan &rarr;
             </Link>
           </div>
 
-          <div className="space-y-12">
+          <div className="space-y-10">
             {recentPosts.map((post) => (
               <article key={post.id} className="group">
                 {post.url ? (
@@ -253,11 +499,6 @@ export function Home() {
               </article>
             ))}
           </div>
-          <div className="mt-12 sm:hidden text-center">
-             <Link to="/blog" className="inline-flex items-center text-sm font-bold uppercase tracking-widest text-[#E84634]">
-              view all posts
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -266,10 +507,10 @@ export function Home() {
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="flex justify-between items-end mb-16">
             <div>
-              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">watch &amp; listen</h2>
+              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">Watch &amp; Listen</h2>
             </div>
             <Link to="/media" className="hidden sm:inline-flex items-center text-sm font-bold uppercase tracking-widest text-[#E84634] hover:opacity-70 transition-colors">
-              view all
+              Lihat Semua &rarr;
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
@@ -318,11 +559,6 @@ export function Home() {
                 </a>
               );
             })}
-          </div>
-          <div className="mt-12 sm:hidden text-center">
-             <Link to="/media" className="inline-flex items-center text-sm font-bold uppercase tracking-widest text-[#E84634]">
-              view all media
-            </Link>
           </div>
         </div>
       </section>

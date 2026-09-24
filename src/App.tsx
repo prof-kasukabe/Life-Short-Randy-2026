@@ -10,6 +10,7 @@ import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Portfolio } from './pages/Portfolio';
+import { ITProjects } from './pages/ITProjects';
 import { Blog } from './pages/Blog';
 import { Media } from './pages/Media';
 import { Bookmarks } from './pages/Bookmarks';
@@ -32,6 +33,8 @@ export default function App() {
               <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
+              <Route path="/projects" element={<ITProjects />} />
+              <Route path="/it-projects" element={<ITProjects />} />
               <Route path="/curated" element={<Portfolio />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/media" element={<Media />} />

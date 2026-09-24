@@ -10,6 +10,24 @@ export function BlogPostDetail() {
   const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = document.documentElement.clientHeight;
+      const totalScrollable = scrollHeight - clientHeight;
+      if (totalScrollable > 0) {
+        setScrollProgress((scrollY / totalScrollable) * 100);
+      } else {
+        setScrollProgress(0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -45,8 +63,13 @@ export function BlogPostDetail() {
   }
 
   return (
-    <article className="pt-24 pb-32 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <Helmet>
+    <>
+      <div 
+        className="fixed top-0 left-0 h-1 bg-[#E84634] z-50 transition-all duration-150 ease-out"
+        style={{ width: `${scrollProgress}%` }}
+      />
+      <article className="pt-24 pb-32 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Helmet>
         <title>{post.title} - Randy's Blog</title>
         <meta name="description" content={post.content ? post.content.substring(0, 150) : post.title} />
         {/* Open Graph Meta Tags */}
@@ -72,5 +95,6 @@ export function BlogPostDetail() {
         ) : null}
       </div>
     </article>
+    </>
   );
 }

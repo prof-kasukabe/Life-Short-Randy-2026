@@ -12,12 +12,13 @@ import {
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { Helmet } from 'react-helmet-async';
 import { getMediaThumbnail } from '../lib/media';
-import { Shield, Lock, Mail, Key, UserCheck, AlertCircle, LogOut, CheckCircle2, Loader2, Plus, Edit2, Trash2, Settings } from 'lucide-react';
+import { Shield, Lock, Mail, Key, UserCheck, AlertCircle, LogOut, CheckCircle2, Loader2, Plus, Edit2, Trash2, Settings, Code2, Sparkles, Database } from 'lucide-react';
+import { itProjectsData } from '../data';
 
 export function Admin() {
   const [user, setUser] = useState<User | null>(null);
   const [curatedSpace, setCuratedSpace] = useState<'verbal' | 'visual'>('verbal');
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'visual' | 'blog' | 'media' | 'bookmarks'>('portfolio');
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'visual' | 'blog' | 'media' | 'bookmarks' | 'it_projects'>('it_projects');
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -33,7 +34,11 @@ export function Admin() {
   const [isRegistering, setIsRegistering] = useState(false);
 
   // Form states
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<any>({
+    status: 'in_progress',
+    category: 'Full-Stack',
+    progressPercentage: 70
+  });
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,13 +61,13 @@ export function Admin() {
 
   const getCollectionName = (tab: string) => {
     if (tab === 'portfolio') return curatedSpace === 'verbal' ? 'portfolios' : 'visuals';
-    
+    if (tab === 'it_projects') return 'it_projects';
     if (tab === 'blog') return 'blogs';
     if (tab === 'bookmarks') return 'bookmarks';
     return 'media';
   };
 
-  const fetchData = async (tab: 'portfolio' | 'visual' | 'blog' | 'media' | 'bookmarks') => {
+  const fetchData = async (tab: 'portfolio' | 'visual' | 'blog' | 'media' | 'bookmarks' | 'it_projects') => {
     setLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, getCollectionName(tab)));
@@ -153,8 +158,39 @@ export function Admin() {
 
   const handleEdit = (item: any) => {
     setEditingId(item.id);
-    setFormData(item);
+    if (activeTab === 'it_projects') {
+      const editCopy = { ...item };
+      if (Array.isArray(editCopy.techStack)) {
+        editCopy.techStack = editCopy.techStack.join(', ');
+      }
+      if (Array.isArray(editCopy.features)) {
+        editCopy.features = editCopy.features.join('\n');
+      }
+      setFormData(editCopy);
+    } else {
+      setFormData(item);
+    }
     setFormFeedback(null);
+  };
+
+  const handleSeedITProjects = async () => {
+    setLoading(true);
+    setFormFeedback(null);
+    try {
+      for (const p of itProjectsData) {
+        const { id, ...rest } = p;
+        await addDoc(collection(db, 'it_projects'), {
+          ...rest,
+          createdAt: serverTimestamp()
+        });
+      }
+      setFormFeedback({ type: 'success', message: 'Semua 7 contoh Proyek TI berhasil dimuat ke Firestore!' });
+      fetchData('it_projects');
+    } catch (e: any) {
+      setFormFeedback({ type: 'error', message: `Gagal memuat: ${e.message || 'Error'}` });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -166,7 +202,25 @@ export function Admin() {
     let rawData: Record<string, any> = { ...formData };
 
     // Set intelligent fallbacks based on active section
-    if (activeTab === 'portfolio' && curatedSpace === 'visual') {
+    if (activeTab === 'it_projects') {
+      if (!rawData.status) rawData.status = 'in_progress';
+      if (!rawData.category) rawData.category = 'Full-Stack';
+      if (typeof rawData.techStack === 'string') {
+        rawData.techStack = rawData.techStack.split(',').map((s: string) => s.trim()).filter(Boolean);
+      }
+      if (!Array.isArray(rawData.techStack) || rawData.techStack.length === 0) {
+        rawData.techStack = ['TypeScript', 'React'];
+      }
+      if (typeof rawData.features === 'string') {
+        rawData.features = rawData.features.split('\n').map((s: string) => s.trim()).filter(Boolean);
+      }
+      if (rawData.progressPercentage !== undefined && rawData.progressPercentage !== '') {
+        rawData.progressPercentage = Number(rawData.progressPercentage);
+      }
+      if (!rawData.imageUrl) {
+        rawData.imageUrl = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80';
+      }
+    } else if (activeTab === 'portfolio' && curatedSpace === 'visual') {
       if (!rawData.date) rawData.date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       if (!rawData.mediaType) rawData.mediaType = 'video';
     } else if (activeTab === 'portfolio' && curatedSpace === 'verbal') {
@@ -381,13 +435,21 @@ export function Admin() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-8 border-b border-zinc-200/80 dark:border-zinc-800/80 pb-4">
-        <button 
-          onClick={() => { setActiveTab('portfolio'); setFormData({}); setEditingId(null); }}
-          className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeTab === 'portfolio' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-[#E84634] hover:bg-zinc-200 dark:bg-zinc-900 dark:text-[#E84634] dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
-        >
-          Curated Works
-        </button>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8 border-b border-zinc-200/80 dark:border-zinc-800/80 pb-4">
+        <div className="flex flex-wrap gap-2">
+          <button 
+            onClick={() => { setActiveTab('it_projects'); setFormData({ status: 'in_progress', category: 'Full-Stack', progressPercentage: 70 }); setEditingId(null); }}
+            className={`px-4 py-2 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'it_projects' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-[#E84634] hover:bg-zinc-200 dark:bg-zinc-900 dark:text-[#E84634] dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
+          >
+            <Code2 size={14} />
+            <span>IT Projects</span>
+          </button>
+          <button 
+            onClick={() => { setActiveTab('portfolio'); setFormData({}); setEditingId(null); }}
+            className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeTab === 'portfolio' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-[#E84634] hover:bg-zinc-200 dark:bg-zinc-900 dark:text-[#E84634] dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
+          >
+            Curated Works
+          </button>
         <button 
           onClick={() => { setActiveTab('blog'); setFormData({}); setEditingId(null); }}
           className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeTab === 'blog' ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20' : 'bg-zinc-100/80 text-[#E84634] hover:bg-zinc-200 dark:bg-zinc-900 dark:text-[#E84634] dark:hover:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-800/60'}`}
@@ -407,6 +469,19 @@ export function Admin() {
           Bookmarks
         </button>
       </div>
+
+      {activeTab === 'it_projects' && (
+        <button
+          type="button"
+          onClick={handleSeedITProjects}
+          className="text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 border border-orange-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
+          title="Muat 7 contoh proyek TI bawaan ke Firestore"
+        >
+          <Database size={13} />
+          <span>Muat Contoh Proyek TI ke DB</span>
+        </button>
+      )}
+    </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-1">
@@ -492,6 +567,169 @@ export function Admin() {
                 </div>
               </div>
               
+              {activeTab === 'it_projects' && (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Tagline / Ringkasan</label>
+                    <input 
+                      type="text" 
+                      name="tagline" 
+                      placeholder="e.g. Autonomous visual workflow orchestrator..."
+                      value={formData.tagline || ''} 
+                      onChange={handleInputChange} 
+                      required 
+                      className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Status Proyek</label>
+                      <select
+                        name="status"
+                        value={formData.status || 'in_progress'}
+                        onChange={handleInputChange}
+                        className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all cursor-pointer font-medium"
+                      >
+                        <option value="in_progress">Sedang Dikerjakan (In Progress)</option>
+                        <option value="completed">Selesai (Completed)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Kategori Domain</label>
+                      <select
+                        name="category"
+                        value={formData.category || 'Full-Stack'}
+                        onChange={handleInputChange}
+                        className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all cursor-pointer font-medium"
+                      >
+                        <option value="Full-Stack">Full-Stack</option>
+                        <option value="AI & Machine Learning">AI &amp; Machine Learning</option>
+                        <option value="Frontend">Frontend</option>
+                        <option value="Backend & API">Backend &amp; API</option>
+                        <option value="DevOps & Cloud">DevOps &amp; Cloud</option>
+                        <option value="Mobile App">Mobile App</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Timeline</label>
+                      <input 
+                        type="text" 
+                        name="timeline" 
+                        placeholder="e.g. Jul 2026 - Present"
+                        value={formData.timeline || ''} 
+                        onChange={handleInputChange} 
+                        className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Progress (%)</label>
+                      <input 
+                        type="number" 
+                        name="progressPercentage" 
+                        min="0"
+                        max="100"
+                        placeholder="e.g. 80"
+                        value={formData.progressPercentage !== undefined ? formData.progressPercentage : 100} 
+                        onChange={handleInputChange} 
+                        className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Tech Stack (Pisahkan dengan koma)</label>
+                    <input 
+                      type="text" 
+                      name="techStack" 
+                      placeholder="React 19, TypeScript, Python, FastAPI, Docker"
+                      value={formData.techStack || ''} 
+                      onChange={handleInputChange} 
+                      className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">URL Gambar / Screenshot</label>
+                    <input 
+                      type="text" 
+                      name="imageUrl" 
+                      placeholder="https://images.unsplash.com/..."
+                      value={formData.imageUrl || ''} 
+                      onChange={handleInputChange} 
+                      className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Live Demo URL</label>
+                      <input 
+                        type="url" 
+                        name="demoUrl" 
+                        placeholder="https://app.example.com"
+                        value={formData.demoUrl || ''} 
+                        onChange={handleInputChange} 
+                        className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">GitHub Repo URL</label>
+                      <input 
+                        type="url" 
+                        name="githubUrl" 
+                        placeholder="https://github.com/..."
+                        value={formData.githubUrl || ''} 
+                        onChange={handleInputChange} 
+                        className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Deskripsi Lengkap</label>
+                    <textarea 
+                      name="description" 
+                      rows={3}
+                      placeholder="Jelaskan tujuan proyek, masalah yang diselesaikan, dan dampaknya..."
+                      value={formData.description || ''} 
+                      onChange={handleInputChange} 
+                      required
+                      className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Ringkasan Arsitektur Sistem</label>
+                    <textarea 
+                      name="architectureSummary" 
+                      rows={2}
+                      placeholder="Contoh: Microservice architecture separating React canvas from containerized FastAPI..."
+                      value={formData.architectureSummary || ''} 
+                      onChange={handleInputChange} 
+                      className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all font-mono text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-1.5">Fitur Unggulan (1 per baris)</label>
+                    <textarea 
+                      name="features" 
+                      rows={3}
+                      placeholder="Drag-and-drop workflow canvas&#10;Async worker cluster Celery + Redis&#10;WebSocket live inspection"
+                      value={formData.features || ''} 
+                      onChange={handleInputChange} 
+                      className="w-full px-3.5 py-2.5 text-sm border rounded-xl bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all text-xs"
+                    />
+                  </div>
+                </>
+              )}
+
               {activeTab === 'portfolio' && curatedSpace === 'verbal' && (
                 <>
                   <div>
@@ -890,6 +1128,18 @@ export function Admin() {
                         <div className="min-w-0">
                           <h3 className="font-bold text-base text-[#E84634] dark:text-[#E84634] truncate">{item.title}</h3>
                           <div className="flex items-center gap-2 text-xs text-[#E84634] dark:text-[#E84634] mt-0.5 flex-wrap">
+                            {activeTab === 'it_projects' && (
+                              <>
+                                <span className={`px-2 py-0.5 rounded-md font-semibold text-[11px] ${
+                                  item.status === 'in_progress' 
+                                    ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30' 
+                                    : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
+                                }`}>
+                                  {item.status === 'in_progress' ? `Sedang Dikerjakan (${item.progressPercentage ?? 50}%)` : 'Selesai'}
+                                </span>
+                                {item.timeline && <span className="font-mono text-[11px] opacity-75">{item.timeline}</span>}
+                              </>
+                            )}
                             {item.category && <span className="bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-md font-semibold capitalize">{item.category}</span>}
                             {item.platform && <span className="font-medium text-[#E84634] dark:text-[#E84634]">{item.platform}</span>}
                             {item.date && <span>&middot; {item.date}</span>}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Moon, Sun, Menu, X, Home, User, Palette, BookOpen, PlaySquare, Bookmark, Mail, Settings } from 'lucide-react';
+import { Moon, Sun, Menu, X, Home, User, Palette, BookOpen, PlaySquare, Bookmark, Mail, Settings, Code2 } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 
 export function Navbar() {
@@ -12,6 +12,7 @@ export function Navbar() {
   const navLinks = [
     { name: 'Home', path: '/', icon: Home },
     { name: 'About', path: '/about', icon: User },
+    { name: 'IT Projects', path: '/projects', icon: Code2 },
     { name: 'Curated', path: '/curated', icon: Palette },
     { name: 'Reading List', path: '/blog', icon: BookOpen },
     { name: 'Media', path: '/media', icon: PlaySquare },

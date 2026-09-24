@@ -20,6 +20,24 @@
         { "name": "readTime", "type": "string" },
         { "name": "createdAt", "type": "timestamp" }
       ]
+    },
+    {
+      "name": "it_projects",
+      "fields": [
+        { "name": "title", "type": "string" },
+        { "name": "tagline", "type": "string" },
+        { "name": "description", "type": "string" },
+        { "name": "category", "type": "string" },
+        { "name": "status", "type": "string" },
+        { "name": "progressPercentage", "type": "number" },
+        { "name": "techStack", "type": "array" },
+        { "name": "timeline", "type": "string" },
+        { "name": "architectureSummary", "type": "string" },
+        { "name": "imageUrl", "type": "string" },
+        { "name": "demoUrl", "type": "string" },
+        { "name": "githubUrl", "type": "string" },
+        { "name": "createdAt", "type": "timestamp" }
+      ]
     }
   ]
 }
