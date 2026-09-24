@@ -22,7 +22,7 @@ import { itProjectsData } from '../data';
 import { Helmet } from 'react-helmet-async';
 import { getMediaThumbnail } from '../lib/media';
 import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
-import kudoGhibliImg from '../assets/images/kudo_ghibli.jpg';
+import { InteractiveIdentityShowcase } from '../components/InteractiveIdentityShowcase';
 
 const getDomain = (url: string) => {
   try {
@@ -156,13 +156,9 @@ export function Home() {
             </div>
           </a>
 
-          {/* Visual Showcase Banner */}
-          <div className="w-full aspect-[4/3] sm:aspect-video rounded-[2rem] overflow-hidden relative shadow-xl border border-[#E0DACE]/80 dark:border-[#3A332E]/80">
-            <img 
-              src={kudoGhibliImg} 
-              alt="Randy Ghibli Aesthetic" 
-              className="w-full h-full object-cover" 
-            />
+          {/* Interactive Identity & Systems Architecture Showcase */}
+          <div className="w-full">
+            <InteractiveIdentityShowcase />
           </div>
         </div>
       </section>
