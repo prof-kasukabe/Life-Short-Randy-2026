@@ -23,6 +23,7 @@ import { Helmet } from 'react-helmet-async';
 import { getMediaThumbnail } from '../lib/media';
 import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
 import { GenerativeParticleCanvas } from '../components/GenerativeParticleCanvas';
+import { CuratedVerbalShelf } from '../components/CuratedVerbalShelf';
 
 const getDomain = (url: string) => {
   try {
@@ -392,58 +393,18 @@ export function Home() {
       {/* Featured Editorial Work (Curated Journal) */}
       <section className="py-24 border-t border-[#E0DACE] dark:border-[#3A332E]">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-16 px-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12 px-4">
             <div>
-              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">Curated Space</h2>
+              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">Curated Verbal</h2>
               <p className="text-[#E84634] font-medium italic pb-1">A selection of stories and visual projects crafted carefully over time.</p>
             </div>
             <Link to="/curated" className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E84634] hover:opacity-75 transition-opacity">
               Lihat Semua Galeri &rarr;
             </Link>
           </div>
-          
-          <div className="flex overflow-x-auto gap-6 lg:gap-8 pb-8 snap-x px-4 [&::-webkit-scrollbar]:hidden">
-            {featuredWorks.length > 0 ? featuredWorks.map((work) => (
-              <Link key={work.id} to="/curated" className="group block shrink-0 snap-start w-[280px] sm:w-[320px]">
-                <div className="aspect-[3/4] overflow-hidden bg-zinc-100 dark:bg-zinc-900 mb-5 relative rounded-[1.5rem] shadow-sm">
-                  <img
-                    src={work.imageUrl}
-                    alt={work.title}
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=800&auto=format&fit=crop';
-                    }}
-                  />
-                </div>
-                <div className="text-center">
-                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E84634] transition-colors leading-relaxed">
-                    {work.title}
-                  </h3>
-                </div>
-              </Link>
-            )) : (
-              <>
-                <div className="group block shrink-0 snap-start w-[280px] sm:w-[320px]">
-                  <div className="aspect-[3/4] overflow-hidden relative rounded-[1.5rem] shadow-sm mb-4">
-                    <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover" />
-                  </div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#E84634] text-center leading-relaxed">A Mother-Daughter Reunion In The French Countryside</h3>
-                </div>
-                <div className="group block shrink-0 snap-start w-[280px] sm:w-[320px]">
-                  <div className="aspect-[3/4] overflow-hidden relative rounded-[1.5rem] shadow-sm mb-4">
-                    <img src="https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover" />
-                  </div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#E84634] text-center leading-relaxed">A Heartbreak-Healing Solo Trip To The Greek Islands</h3>
-                </div>
-                <div className="group block shrink-0 snap-start w-[280px] sm:w-[320px]">
-                  <div className="aspect-[3/4] overflow-hidden relative rounded-[1.5rem] shadow-sm mb-4">
-                    <img src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover" />
-                  </div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#E84634] text-center leading-relaxed">A September In Sicily For The Couple Who Love Long Dinners</h3>
-                </div>
-              </>
-            )}
+
+          <div className="px-2 sm:px-4">
+            <CuratedVerbalShelf items={featuredWorks} />
           </div>
         </div>
       </section>

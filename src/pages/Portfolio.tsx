@@ -1,16 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, X, ZoomIn, Palette } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, ZoomIn } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { PortfolioItem, VisualItem } from '../types';
 import { Helmet } from 'react-helmet-async';
 import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
+import { CuratedVerbalShelf } from '../components/CuratedVerbalShelf';
 
 export function Portfolio() {
   const [activeSpace, setActiveSpace] = useState<'verbal' | 'visual'>('verbal');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('All');
   const [lightboxItem, setLightboxItem] = useState<PortfolioItem | null>(null);
   const [visualLightboxItem, setVisualLightboxItem] = useState<VisualItem | null>(null);
   const [portfolioData, setPortfolioData] = useState<PortfolioItem[]>([]);
@@ -38,56 +36,37 @@ export function Portfolio() {
     fetchData();
   }, []);
 
-  const uniqueCategories = new Map();
-  portfolioData.forEach(item => {
-    const cat = (item.category || '').trim();
-    if (cat && !uniqueCategories.has(cat.toLowerCase())) {
-      uniqueCategories.set(cat.toLowerCase(), cat);
-    }
-  });
-  const categories = ['All', ...Array.from(uniqueCategories.values())];
-
-  const filteredData = useMemo(() => {
-    return portfolioData.filter((item) => {
-      const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            item.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const itemCat = (item.category || '').trim();
-      const matchesCategory = activeCategory === 'All' || itemCat.toLowerCase() === activeCategory.toLowerCase();
-      return matchesSearch && matchesCategory;
-    });
-  }, [searchQuery, activeCategory, portfolioData]);
-
   return (
-    <div className="pt-32 pb-32 max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+    <div className="pt-24 pb-32 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
       <Helmet>
         <title>Curated Portfolio - Randy</title>
-        <meta name="description" content="A Long stories about life after reading" />
+        <meta name="description" content="A selection of stories and visual projects crafted carefully over time." />
       </Helmet>
       
-      <div className="flex flex-col md:flex-row gap-12 items-start mb-20">
+      <div className="flex flex-col md:flex-row gap-10 items-start mb-14 max-w-5xl mx-auto">
         <div className="shrink-0 animate-[float_6s_ease-in-out_infinite]">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-3 hover:rotate-6 transition-transform">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-3 hover:rotate-6 transition-transform">
             <img src={avatarImg} alt="Randy Avatar - Curated" className="w-full h-full object-cover" />
           </div>
         </div>
         <div className="max-w-3xl flex-1">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif-display tracking-tight mb-6 text-[#E84634] dark:text-[#E84634] leading-tight flex items-center gap-4">
+          <h1 className="text-5xl sm:text-6xl font-serif-display tracking-tight mb-4 text-[#E84634] dark:text-[#E84634] leading-tight flex items-center gap-4">
             Curated Space
           </h1>
-          <p className="text-xl text-[#E84634] dark:text-[#E84634] font-light max-w-xl leading-relaxed mb-6">
+          <p className="text-lg sm:text-xl text-[#E84634] dark:text-[#E84634] font-light max-w-xl leading-relaxed mb-6">
             A selection of stories and visual projects crafted carefully over time.
           </p>
 
-          <div className="flex gap-4 border-b border-[#E0DACE] dark:border-[#3A332E] pb-4 mb-4">
+          <div className="flex gap-6 border-b border-[#E0DACE] dark:border-[#3A332E] pb-3">
             <button
               onClick={() => setActiveSpace('verbal')}
-              className={`text-lg font-serif-display font-medium px-2 py-1 transition-colors ${activeSpace === 'verbal' ? 'text-[#E84634] border-b-2 border-[#E84634]' : 'text-[#E84634]/60 hover:text-[#E84634]'}`}
+              className={`text-lg font-serif-display font-medium px-1 py-1 transition-colors cursor-pointer ${activeSpace === 'verbal' ? 'text-[#E84634] border-b-2 border-[#E84634]' : 'text-[#E84634]/60 hover:text-[#E84634]'}`}
             >
               Curated Verbal
             </button>
             <button
               onClick={() => setActiveSpace('visual')}
-              className={`text-lg font-serif-display font-medium px-2 py-1 transition-colors ${activeSpace === 'visual' ? 'text-[#E84634] border-b-2 border-[#E84634]' : 'text-[#E84634]/60 hover:text-[#E84634]'}`}
+              className={`text-lg font-serif-display font-medium px-1 py-1 transition-colors cursor-pointer ${activeSpace === 'visual' ? 'text-[#E84634] border-b-2 border-[#E84634]' : 'text-[#E84634]/60 hover:text-[#E84634]'}`}
             >
               Curated Visual
             </button>
@@ -96,86 +75,7 @@ export function Portfolio() {
       </div>
 
       {activeSpace === 'verbal' ? (
-        <>
-          {/* Filters and Search */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16">
-            <div className="flex flex-wrap gap-3">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setActiveCategory(category)}
-                  className={`text-sm font-medium transition-all px-1 border-b-2 ${
-                    activeCategory === category
-                      ? 'border-orange-500 text-[#E84634] dark:text-[#E84634]'
-                      : 'border-transparent text-[#E84634] hover:text-[#E84634] dark:text-[#E84634] dark:hover:text-[#E84634]'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-            <div className="relative w-full md:w-64">
-              <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
-                <Search size={16} className="text-[#E84634]" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search projects..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-8 pr-3 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-transparent placeholder-zinc-500 focus:outline-none focus:border-zinc-500 dark:focus:border-zinc-400 sm:text-sm transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Gallery */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 gap-y-16">
-            {filteredData.map((item) => (
-              <div key={item.id} className="group relative">
-                <div 
-                  className="aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-zinc-900 mb-6 cursor-pointer relative rounded-sm"
-                  onClick={() => setLightboxItem(item)}
-                >
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=800&auto=format&fit=crop';
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
-                    <ZoomIn className="text-orange-400 opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 duration-300" size={32} />
-                  </div>
-                </div>
-                <div className="flex justify-between items-start gap-4">
-                  <div>
-                    <h3 className="text-xl font-medium text-[#E84634] dark:text-[#E84634] group-hover:text-orange-500 transition-colors flex items-center gap-2 mb-1">
-                      {item.iconUrl && (
-                        <img src={item.iconUrl} alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
-                      )}
-                      {item.title}
-                    </h3>
-                    <div className="flex items-center gap-2 mb-3 text-sm text-[#E84634] dark:text-[#E84634]">
-                      <span>{item.category}</span>
-                    </div>
-                    <p className="text-sm text-[#E84634] dark:text-[#E84634] line-clamp-3 leading-relaxed">{item.description}</p>
-                  </div>
-                  {item.date && (
-                    <time className="text-sm text-[#E84634] dark:text-[#E84634] font-serif-display italic shrink-0">{item.date}</time>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {filteredData.length === 0 && (
-            <div className="text-center py-24 text-[#E84634]">
-              No projects found matching your criteria.
-            </div>
-          )}
-        </>
+        <CuratedVerbalShelf items={portfolioData} />
       ) : (
         <>
           {/* Visual Gallery */}
