@@ -22,7 +22,7 @@ import { itProjectsData } from '../data';
 import { Helmet } from 'react-helmet-async';
 import { getMediaThumbnail } from '../lib/media';
 import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
-import { InteractiveIdentityShowcase } from '../components/InteractiveIdentityShowcase';
+import { GenerativeParticleCanvas } from '../components/GenerativeParticleCanvas';
 
 const getDomain = (url: string) => {
   try {
@@ -156,9 +156,9 @@ export function Home() {
             </div>
           </a>
 
-          {/* Interactive Identity & Systems Architecture Showcase */}
+          {/* Generative Particle Canvas Showcase */}
           <div className="w-full">
-            <InteractiveIdentityShowcase />
+            <GenerativeParticleCanvas />
           </div>
         </div>
       </section>
