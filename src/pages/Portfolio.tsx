@@ -1,19 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { X, ZoomIn } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Library, LayoutGrid, Palette, ArrowLeft } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { PortfolioItem, VisualItem } from '../types';
 import { Helmet } from 'react-helmet-async';
-import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
-import { CuratedVerbalShelf } from '../components/CuratedVerbalShelf';
+import { CuratedVerbalShelf, DEFAULT_VERBAL_ARCHIVE } from '../components/CuratedVerbalShelf';
+import { BoardPageLayout, BoardTabItem } from '../components/BoardPageLayout';
 
 export function Portfolio() {
-  const [activeSpace, setActiveSpace] = useState<'verbal' | 'visual'>('verbal');
-  const [lightboxItem, setLightboxItem] = useState<PortfolioItem | null>(null);
-  const [visualLightboxItem, setVisualLightboxItem] = useState<VisualItem | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('verbal-shelf');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [portfolioData, setPortfolioData] = useState<PortfolioItem[]>([]);
   const [visualData, setVisualData] = useState<VisualItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedVisual, setSelectedVisual] = useState<VisualItem | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,227 +21,212 @@ export function Portfolio() {
           getDocs(collection(db, 'portfolios')),
           getDocs(collection(db, 'visuals'))
         ]);
-        
-        const pData = portfolioSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PortfolioItem[];
+
+        const pData = portfolioSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        })) as PortfolioItem[];
         setPortfolioData(pData.reverse());
 
-        const vData = visualSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as VisualItem[];
+        const vData = visualSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        })) as VisualItem[];
         setVisualData(vData.reverse());
       } catch (error) {
-        console.error("Error fetching portfolios:", error);
+        console.error('Error fetching portfolios:', error);
       }
-      setLoading(false);
     };
     fetchData();
   }, []);
 
+  const allVerbalItems = useMemo(() => {
+    const merged =
+      portfolioData.length > 0
+        ? [
+            ...portfolioData,
+            ...DEFAULT_VERBAL_ARCHIVE.filter(
+              (d) => !portfolioData.some((f) => f.title.toLowerCase() === d.title.toLowerCase())
+            )
+          ]
+        : DEFAULT_VERBAL_ARCHIVE;
+    if (!searchQuery.trim()) return merged;
+    const q = searchQuery.toLowerCase();
+    return merged.filter(
+      (item) =>
+        item.title.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q) ||
+        (item.category || '').toLowerCase().includes(q)
+    );
+  }, [portfolioData, searchQuery]);
+
+  const tabs: BoardTabItem[] = [
+    { id: 'verbal-shelf', label: 'Curated Verbal (3D Shelf)', icon: Library, badge: allVerbalItems.length },
+    { id: 'verbal-board', label: 'Verbal Board Grid', icon: LayoutGrid, badge: allVerbalItems.length },
+    { id: 'visual', label: 'Curated Visual', icon: Palette, badge: visualData.length }
+  ];
+
   return (
-    <div className="pt-24 pb-32 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+    <>
       <Helmet>
-        <title>Curated Portfolio - Randy</title>
-        <meta name="description" content="A selection of stories and visual projects crafted carefully over time." />
+        <title>Curated Space — Randy</title>
+        <meta
+          name="description"
+          content="A selection of stories and visual projects crafted carefully over time."
+        />
       </Helmet>
-      
-      <div className="flex flex-col md:flex-row gap-10 items-start mb-14 max-w-5xl mx-auto">
-        <div className="shrink-0 animate-[float_6s_ease-in-out_infinite]">
-          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-3 hover:rotate-6 transition-transform">
-            <img src={avatarImg} alt="Randy Avatar - Curated" className="w-full h-full object-cover" />
-          </div>
-        </div>
-        <div className="max-w-3xl flex-1">
-          <h1 className="text-5xl sm:text-6xl font-serif-display tracking-tight mb-4 text-[#E84634] dark:text-[#E84634] leading-tight flex items-center gap-4">
-            Curated Space
-          </h1>
-          <p className="text-lg sm:text-xl text-[#E84634] dark:text-[#E84634] font-light max-w-xl leading-relaxed mb-6">
-            A selection of stories and visual projects crafted carefully over time.
-          </p>
 
-          <div className="flex gap-6 border-b border-[#E0DACE] dark:border-[#3A332E] pb-3">
-            <button
-              onClick={() => setActiveSpace('verbal')}
-              className={`text-lg font-serif-display font-medium px-1 py-1 transition-colors cursor-pointer ${activeSpace === 'verbal' ? 'text-[#E84634] border-b-2 border-[#E84634]' : 'text-[#E84634]/60 hover:text-[#E84634]'}`}
-            >
-              Curated Verbal
-            </button>
-            <button
-              onClick={() => setActiveSpace('visual')}
-              className={`text-lg font-serif-display font-medium px-1 py-1 transition-colors cursor-pointer ${activeSpace === 'visual' ? 'text-[#E84634] border-b-2 border-[#E84634]' : 'text-[#E84634]/60 hover:text-[#E84634]'}`}
-            >
-              Curated Visual
-            </button>
-          </div>
-        </div>
-      </div>
+      <BoardPageLayout
+        pageTitle="Curated Space"
+        pageSubtitle="A selection of stories, verbal volumes, and visual projects crafted carefully over time."
+        breadcrumbCategory="Curated"
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={(id) => {
+          setActiveTab(id);
+          setSelectedVisual(null);
+        }}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search volumes or visuals..."
+      >
+        {activeTab === 'verbal-shelf' && (
+          <CuratedVerbalShelf items={portfolioData} searchQuery={searchQuery} />
+        )}
 
-      {activeSpace === 'verbal' ? (
-        <CuratedVerbalShelf items={portfolioData} />
-      ) : (
-        <>
-          {/* Visual Gallery */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 gap-y-16">
-            {visualData.map((item) => (
-              <div key={item.id} className="group relative">
-                <div 
-                  className="aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-zinc-900 mb-6 cursor-pointer relative rounded-sm"
-                  onClick={() => setVisualLightboxItem(item)}
-                >
-                  {item.mediaType === 'video' ? (
-                    <video
-                      src={item.mediaUrl}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                    />
-                  ) : (
-                    <img
-                      src={item.mediaUrl}
-                      alt={item.title || 'Visual Project'}
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
-                    <ZoomIn className="text-orange-400 opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 duration-300" size={32} />
+        {activeTab === 'verbal-board' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {allVerbalItems.map((item, idx) => (
+              <div
+                key={item.id}
+                onClick={() => setActiveTab('verbal-shelf')}
+                className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE]/80 dark:border-[#332D29] hover:border-[#E84634] p-4 flex flex-col justify-between min-h-[185px] transition-all cursor-pointer shadow-2xs"
+              >
+                <div>
+                  <div className="flex items-center justify-between text-[11px] font-mono text-[#6E655B] dark:text-[#A39B8F] mb-2">
+                    <span className="font-bold text-[#2A2521] dark:text-[#F5F2EB]">
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <span>{item.date || '2026'}</span>
                   </div>
+                  <h3 className="text-base font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors leading-snug mb-1.5">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 leading-relaxed">
+                    {item.description}
+                  </p>
                 </div>
-                <div className="flex justify-between items-start gap-4">
-                  <div>
-                    {item.title && (
-                      <h3 className="text-xl font-medium text-[#E84634] dark:text-[#E84634] group-hover:text-orange-500 transition-colors flex items-center gap-2 mb-1">
-                        {item.title}
-                      </h3>
-                    )}
-                    {item.description && (
-                      <p className="text-sm text-[#E84634] dark:text-[#E84634] line-clamp-3 leading-relaxed mt-2">{item.description}</p>
-                    )}
-                  </div>
-                  {item.date && (
-                    <time className="text-sm text-[#E84634] dark:text-[#E84634] font-serif-display italic shrink-0">{item.date}</time>
-                  )}
+
+                <div className="mt-3 pt-2 border-t border-[#E0DACE]/50 dark:border-[#2E2824] flex items-center justify-between text-[10px] font-mono">
+                  <span className="px-2 py-0.5 rounded bg-[#E84634]/12 text-[#E84634] font-semibold">
+                    {item.category || 'Verbal'}
+                  </span>
+                  <span className="text-[#6E655B] dark:text-[#A39B8F] group-hover:text-[#E84634]">
+                    Open 3D Shelf &rarr;
+                  </span>
                 </div>
               </div>
             ))}
           </div>
-          {visualData.length === 0 && (
-            <div className="text-center py-24 text-[#E84634]">
-              No visual projects uploaded yet.
-            </div>
-          )}
-        </>
-      )}
+        )}
 
-      {/* Lightbox */}
-      {lightboxItem && (
-        <div 
-          className="fixed inset-0 z-[100] bg-[#FDFBF7]/95 dark:bg-[#1E1A18]/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 cursor-pointer"
-          onClick={() => setLightboxItem(null)}
-        >
-          <Helmet>
-            <title>{lightboxItem.title} - Randy's Portfolio</title>
-            <meta name="description" content={lightboxItem.description} />
-          </Helmet>
-          <button 
-            className="absolute top-4 right-4 sm:top-8 sm:right-8 p-3 text-[#E84634]/70 hover:text-[#E84634] dark:text-[#E84634]/70 dark:hover:text-[#E84634] bg-[#4A3F35]/5 hover:bg-[#E07A5F]/10 dark:bg-[#FDFBF7]/5 dark:hover:bg-[#E07A5F]/10 rounded-full transition-colors cursor-pointer z-10"
-            onClick={(e) => { e.stopPropagation(); setLightboxItem(null); }}
-          >
-            <X size={24} />
-          </button>
-          
-          <div 
-            className="flex flex-col-reverse lg:flex-row items-center justify-center max-w-6xl w-full gap-8 lg:gap-16 cursor-default" 
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Text Content */}
-            <div className="w-full lg:w-1/2 max-w-lg flex flex-col justify-center text-left">
-              <div className="flex items-center gap-3 mb-6 flex-wrap">
-                {lightboxItem.category && (
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#E84634] bg-[#E07A5F]/10 px-3 py-1.5 rounded-full">
-                    {lightboxItem.category}
-                  </span>
-                )}
-                {lightboxItem.date && (
-                  <span className="text-sm font-medium text-[#E84634]/60 dark:text-[#E84634]/60">
-                    {lightboxItem.date}
-                  </span>
-                )}
+        {activeTab === 'visual' && (
+          <>
+            {selectedVisual ? (
+              <div className="rounded-2xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] p-6 max-w-4xl mx-auto">
+                <button
+                  type="button"
+                  onClick={() => setSelectedVisual(null)}
+                  className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[#E84634] hover:underline mb-4 cursor-pointer"
+                >
+                  <ArrowLeft size={14} />
+                  <span>Back to Visual Board</span>
+                </button>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                  <div className="lg:col-span-7 rounded-xl overflow-hidden bg-black/5 border border-[#E0DACE] dark:border-[#332D29]">
+                    {selectedVisual.mediaType === 'video' ? (
+                      <video
+                        src={selectedVisual.mediaUrl}
+                        className="w-full max-h-[380px] object-contain"
+                        controls
+                        autoPlay
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        src={selectedVisual.mediaUrl}
+                        alt={selectedVisual.title}
+                        referrerPolicy="no-referrer"
+                        className="w-full max-h-[380px] object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="lg:col-span-5 space-y-3">
+                    <h3 className="text-2xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB]">
+                      {selectedVisual.title || 'Visual Artifact'}
+                    </h3>
+                    {selectedVisual.date && (
+                      <div className="text-xs font-mono text-[#E84634]">{selectedVisual.date}</div>
+                    )}
+                    {selectedVisual.description && (
+                      <p className="text-xs sm:text-sm text-[#6E655B] dark:text-[#A39B8F] leading-relaxed">
+                        {selectedVisual.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif-display tracking-tight text-[#E84634] dark:text-[#E84634] mb-6 leading-tight">
-                {lightboxItem.title}
-              </h3>
-              <p className="text-lg text-[#E84634]/80 dark:text-[#E84634]/80 leading-relaxed overflow-y-auto max-h-[30vh] lg:max-h-[50vh] pr-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#4A3F35]/20 dark:[&::-webkit-scrollbar-thumb]:bg-[#FDFBF7]/20 [&::-webkit-scrollbar-thumb]:rounded-full">
-                {lightboxItem.description}
-              </p>
-            </div>
-            {/* Image Content */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center">
-              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-[#4A3F35]/10 dark:ring-[#FDFBF7]/10 bg-[#4A3F35]/5 dark:bg-[#FDFBF7]/5">
-                <img
-                  src={lightboxItem.imageUrl}
-                  alt={lightboxItem.title}
-                  referrerPolicy="no-referrer"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=800&auto=format&fit=crop';
-                  }}
-                />
+            ) : visualData.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {visualData.map((item, idx) => (
+                  <div
+                    key={item.id}
+                    onClick={() => setSelectedVisual(item)}
+                    className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] hover:border-[#E84634] overflow-hidden cursor-pointer transition-all"
+                  >
+                    <div className="aspect-[4/3] bg-zinc-100 dark:bg-zinc-900 overflow-hidden relative">
+                      {item.mediaType === 'video' ? (
+                        <video
+                          src={item.mediaUrl}
+                          className="w-full h-full object-cover"
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                        />
+                      ) : (
+                        <img
+                          src={item.mediaUrl}
+                          alt={item.title || 'Visual Project'}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      )}
+                      <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/60 text-white text-[10px] font-mono">
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <div className="p-3.5">
+                      <h3 className="text-sm font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] truncate">
+                        {item.title || 'Visual Study'}
+                      </h3>
+                      {item.description && (
+                        <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 mt-1">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Visual Lightbox */}
-      {visualLightboxItem && (
-        <div 
-          className="fixed inset-0 z-[100] bg-[#FDFBF7]/95 dark:bg-[#1E1A18]/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 cursor-pointer"
-          onClick={() => setVisualLightboxItem(null)}
-        >
-          <button 
-            className="absolute top-4 right-4 sm:top-8 sm:right-8 p-3 text-[#E84634]/70 hover:text-[#E84634] dark:text-[#E84634]/70 dark:hover:text-[#E84634] bg-[#4A3F35]/5 hover:bg-[#E07A5F]/10 dark:bg-[#FDFBF7]/5 dark:hover:bg-[#E07A5F]/10 rounded-full transition-colors cursor-pointer z-10"
-            onClick={(e) => { e.stopPropagation(); setVisualLightboxItem(null); }}
-          >
-            <X size={24} />
-          </button>
-          
-          <div 
-            className="flex flex-col-reverse lg:flex-row items-center justify-center max-w-6xl w-full gap-8 lg:gap-16 cursor-default" 
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-full lg:w-1/2 max-w-lg flex flex-col justify-center text-left">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif-display tracking-tight text-[#E84634] dark:text-[#E84634] mb-6 leading-tight">
-                {visualLightboxItem.title}
-              </h3>
-              {visualLightboxItem.description && (
-                <p className="text-lg text-[#E84634]/80 dark:text-[#E84634]/80 leading-relaxed overflow-y-auto max-h-[30vh] lg:max-h-[50vh] pr-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#4A3F35]/20 dark:[&::-webkit-scrollbar-thumb]:bg-[#FDFBF7]/20 [&::-webkit-scrollbar-thumb]:rounded-full">
-                  {visualLightboxItem.description}
-                </p>
-              )}
-            </div>
-            <div className="w-full lg:w-1/2 flex items-center justify-center">
-              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-[#4A3F35]/10 dark:ring-[#FDFBF7]/10 bg-[#4A3F35]/5 dark:bg-[#FDFBF7]/5">
-                {visualLightboxItem.mediaType === 'video' ? (
-                  <video
-                    src={visualLightboxItem.mediaUrl}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    controls
-                    autoPlay
-                    playsInline
-                  />
-                ) : (
-                  <img
-                    src={visualLightboxItem.mediaUrl}
-                    alt={visualLightboxItem.title}
-                    referrerPolicy="no-referrer"
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                )}
+            ) : (
+              <div className="text-center py-20 text-sm text-[#6E655B] dark:text-[#A39B8F]">
+                No visual projects uploaded yet. Switch to Curated Verbal to explore the 3D Spine Shelf.
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+            )}
+          </>
+        )}
+      </BoardPageLayout>
+    </>
   );
 }

@@ -1,136 +1,287 @@
 import React, { useState } from 'react';
-import { Mail, MapPin, Github, Twitter, Linkedin, CheckCircle2 } from 'lucide-react';
+import {
+  Mail,
+  MapPin,
+  Github,
+  Twitter,
+  Linkedin,
+  CheckCircle2,
+  Send,
+  Globe,
+  Sparkles,
+  ArrowUpRight
+} from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { BoardPageLayout, BoardTabItem } from '../components/BoardPageLayout';
 
 export function Contact() {
+  const [activeTab, setActiveTab] = useState<string>('compose');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
+
     setTimeout(() => {
       setIsSubmitting(false);
       setShowNotification(true);
-      
-      // Hide notification after 3 seconds
-      setTimeout(() => {
-        setShowNotification(false);
-      }, 3000);
-      
-      // Reset form
+      setTimeout(() => setShowNotification(false), 3500);
       (e.target as HTMLFormElement).reset();
-    }, 1000);
+    }, 800);
   };
 
+  const tabs: BoardTabItem[] = [
+    { id: 'compose', label: 'Direct Dispatch', icon: Send },
+    { id: 'channels', label: 'Channels & Socials', icon: Globe, badge: 4 },
+    { id: 'scope', label: 'Collaboration Scope', icon: Sparkles, badge: 3 }
+  ];
+
   return (
-    <div className="pt-24 pb-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+    <>
       <Helmet>
-        <title>Contact - Randy</title>
-        <meta name="description" content="Get in touch with me for freelance projects or full-time opportunities." />
+        <title>Contact — Randy | Collaboration Console</title>
+        <meta
+          name="description"
+          content="Get in touch with Randy for software engineering projects, full-stack systems, or collaborations."
+        />
       </Helmet>
-      {/* Notification Toast */}
-      {showNotification && (
-        <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="flex items-center gap-3 bg-orange-600 text-white px-6 py-3 rounded-full shadow-xl">
-            <CheckCircle2 size={20} className="text-white" />
-            <span className="font-semibold text-sm">Message sent successfully!</span>
+
+      <BoardPageLayout
+        pageTitle="Let's Connect"
+        pageSubtitle="Open for software engineering collaborations, web systems, or technical conversations."
+        breadcrumbCategory="Contact"
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      >
+        {showNotification && (
+          <div className="mb-4 flex items-center gap-2.5 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md">
+            <CheckCircle2 size={16} />
+            <span>Message dispatched successfully! Randy will respond shortly.</span>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
-        <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-[#E84634] dark:text-[#E84634] mb-2 block">Get in Touch</span>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 text-[#E84634] dark:text-[#E84634] flex items-center gap-3">
-            <Mail className="text-[#E84634]" size={40} />
-            Let's Connect<span className="text-[#E84634]">.</span>
-          </h1>
-          <p className="text-lg text-[#E84634] dark:text-[#E84634] mb-12 max-w-md leading-relaxed">
-            I'm currently open for interesting collaborations, web projects, or technical conversations. 
-            Send a note and I'll respond as soon as possible!
-          </p>
+        {activeTab === 'compose' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            {/* Left Info Cards */}
+            <div className="lg:col-span-5 space-y-3.5">
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29]">
+                <div className="inline-flex items-center gap-2 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase mb-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Available for Projects</span>
+                </div>
+                <h3 className="text-2xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] mb-2">
+                  Direct Engineering &amp; Creative Inquiry
+                </h3>
+                <p className="text-xs sm:text-sm text-[#6E655B] dark:text-[#A39B8F] leading-relaxed mb-4">
+                  Send a note regarding full-stack development, AI workflow integration, or creative web architecture.
+                </p>
 
-          <div className="space-y-6 mb-12">
-            <div className="flex items-center gap-4 text-[#E84634] dark:text-[#E84634] hover:text-orange-600 dark:hover:text-orange-400 transition-colors group">
-              <div className="p-3 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-full">
-                <Mail size={20} />
+                <div className="space-y-2.5 pt-3 border-t border-[#E0DACE]/60 dark:border-[#332D29] text-xs">
+                  <a
+                    href="mailto:randyeef00@gmail.com"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-[#F5F2EB] dark:bg-[#191614] hover:border-[#E84634] border border-transparent transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Mail size={15} className="text-[#E84634]" />
+                      <span className="font-mono font-semibold text-[#2A2521] dark:text-[#F5F2EB]">
+                        randyeef00@gmail.com
+                      </span>
+                    </div>
+                    <ArrowUpRight size={13} className="text-[#E84634]" />
+                  </a>
+
+                  <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[#F5F2EB] dark:bg-[#191614]">
+                    <MapPin size={15} className="text-[#E84634]" />
+                    <span className="font-medium text-[#2A2521] dark:text-[#F5F2EB]">
+                      Indonesia Bagian Selatan (UTC+7)
+                    </span>
+                  </div>
+                </div>
               </div>
-              <a href="mailto:randyeef00@gmail.com" className="text-lg font-medium">randyeef00@gmail.com</a>
             </div>
-            <div className="flex items-center gap-4 text-[#E84634] dark:text-[#E84634]">
-              <div className="p-3 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-full">
-                <MapPin size={20} />
+
+            {/* Right Message Form */}
+            <div className="lg:col-span-7 rounded-2xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] p-5 sm:p-6">
+              <h3 className="text-lg font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] mb-4">
+                Send a Message
+              </h3>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block text-[11px] font-mono uppercase tracking-wider text-[#6E655B] dark:text-[#A39B8F] mb-1.5"
+                    >
+                      Your Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      required
+                      placeholder="John Doe"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAFAF5] dark:bg-[#191614] border border-[#E0DACE] dark:border-[#332D29] focus:border-[#E84634] outline-none text-xs sm:text-sm text-[#2A2521] dark:text-[#F5F2EB]"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-[11px] font-mono uppercase tracking-wider text-[#6E655B] dark:text-[#A39B8F] mb-1.5"
+                    >
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      required
+                      placeholder="john@example.com"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAFAF5] dark:bg-[#191614] border border-[#E0DACE] dark:border-[#332D29] focus:border-[#E84634] outline-none text-xs sm:text-sm text-[#2A2521] dark:text-[#F5F2EB]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="message"
+                    className="block text-[11px] font-mono uppercase tracking-wider text-[#6E655B] dark:text-[#A39B8F] mb-1.5"
+                  >
+                    Project Brief or Note
+                  </label>
+                  <textarea
+                    id="message"
+                    required
+                    rows={4}
+                    placeholder="Tell me about your project, timeline, or idea..."
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAFAF5] dark:bg-[#191614] border border-[#E0DACE] dark:border-[#332D29] focus:border-[#E84634] outline-none text-xs sm:text-sm text-[#2A2521] dark:text-[#F5F2EB] resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-3 rounded-xl bg-[#E84634] hover:opacity-90 text-white font-semibold text-xs uppercase tracking-widest transition-all cursor-pointer"
+                >
+                  {isSubmitting ? 'Dispatching...' : 'Send Message'}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'channels' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {[
+              {
+                num: '01',
+                title: 'Electronic Mail',
+                handle: 'randyeef00@gmail.com',
+                href: 'mailto:randyeef00@gmail.com',
+                icon: Mail,
+                tag: 'Primary'
+              },
+              {
+                num: '02',
+                title: 'GitHub',
+                handle: '@randyeef',
+                href: 'https://github.com/randyeef',
+                icon: Github,
+                tag: 'Code & Open Source'
+              },
+              {
+                num: '03',
+                title: 'LinkedIn',
+                handle: 'Randy Ardiansyah',
+                href: '#',
+                icon: Linkedin,
+                tag: 'Professional Network'
+              },
+              {
+                num: '04',
+                title: 'Twitter / X',
+                handle: '@randyeef',
+                href: '#',
+                icon: Twitter,
+                tag: 'Thoughts & Updates'
+              }
+            ].map((ch) => {
+              const Icon = ch.icon;
+              return (
+                <a
+                  key={ch.num}
+                  href={ch.href}
+                  target={ch.href.startsWith('http') ? '_blank' : undefined}
+                  rel="noopener noreferrer"
+                  className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] hover:border-[#E84634] p-4 flex flex-col justify-between min-h-[165px] transition-all"
+                >
+                  <div>
+                    <div className="flex items-center justify-between text-xs font-mono text-[#6E655B] mb-3">
+                      <span>{ch.num}</span>
+                      <Icon size={16} className="text-[#E84634]" />
+                    </div>
+                    <h3 className="text-lg font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634]">
+                      {ch.title}
+                    </h3>
+                    <p className="text-xs font-mono text-[#6E655B] dark:text-[#A39B8F] mt-1">
+                      {ch.handle}
+                    </p>
+                  </div>
+                  <div className="mt-4 pt-2 border-t border-[#E0DACE]/50 dark:border-[#2E2824] flex items-center justify-between text-[10px] font-mono">
+                    <span className="px-2 py-0.5 rounded bg-[#E84634]/12 text-[#E84634] font-semibold">
+                      {ch.tag}
+                    </span>
+                    <ArrowUpRight size={12} className="text-[#E84634]" />
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        )}
+
+        {activeTab === 'scope' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                num: '01',
+                title: 'Full-Stack Web Systems',
+                desc: 'End-to-end architecture using React 19, TypeScript, Node.js/Go, and cloud databases with responsive, high-craft UI.'
+              },
+              {
+                num: '02',
+                title: 'AI & Agentic Workflows',
+                desc: 'Integrating multimodal LLMs, Gemini API pipelines, and intelligent automation into production products.'
+              },
+              {
+                num: '03',
+                title: 'Interactive & Editorial Web',
+                desc: 'Custom HTML5 Canvas experiences, 3D shelves, generative shaders, and minimalist digital publications.'
+              }
+            ].map((s) => (
+              <div
+                key={s.num}
+                className="rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] p-5 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="text-xs font-mono font-bold text-[#E84634] mb-2">{s.num}</div>
+                  <h3 className="text-xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] mb-2">
+                    {s.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#6E655B] dark:text-[#A39B8F] leading-relaxed">
+                    {s.desc}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('compose')}
+                  className="mt-5 text-left text-xs font-mono font-bold uppercase tracking-wider text-[#E84634] hover:underline cursor-pointer"
+                >
+                  Inquire about {s.title} &rarr;
+                </button>
               </div>
-              <span className="text-lg font-medium">Indonesia Bagian Selatan</span>
-            </div>
+            ))}
           </div>
-
-          <div>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-4">Follow &amp; Join</h2>
-            <div className="flex gap-3">
-              <a href="#" className="p-3 bg-zinc-100 dark:bg-zinc-900/80 rounded-full hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all text-[#E84634] dark:text-[#E84634] border border-zinc-200/60 dark:border-zinc-800/60">
-                <Twitter size={18} />
-              </a>
-              <a href="#" className="p-3 bg-zinc-100 dark:bg-zinc-900/80 rounded-full hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all text-[#E84634] dark:text-[#E84634] border border-zinc-200/60 dark:border-zinc-800/60">
-                <Github size={18} />
-              </a>
-              <a href="#" className="p-3 bg-zinc-100 dark:bg-zinc-900/80 rounded-full hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all text-[#E84634] dark:text-[#E84634] border border-zinc-200/60 dark:border-zinc-800/60">
-                <Linkedin size={18} />
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-8 lg:p-10 shadow-sm">
-          <h2 className="text-2xl font-bold tracking-tight mb-8 text-[#E84634] dark:text-[#E84634]">Send a Message</h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-2">Name</label>
-              <input
-                type="text"
-                id="name"
-                required
-                className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all text-sm"
-                placeholder="John Doe"
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-2">Email</label>
-              <input
-                type="email"
-                id="email"
-                required
-                className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all text-sm"
-                placeholder="john@example.com"
-              />
-            </div>
-            <div>
-              <label htmlFor="message" className="block text-xs font-bold uppercase tracking-wider text-[#E84634] dark:text-[#E84634] mb-2">Message</label>
-              <textarea
-                id="message"
-                required
-                rows={5}
-                className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all resize-none text-sm"
-                placeholder="How can I help you?"
-              ></textarea>
-            </div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-all shadow-sm hover:shadow-orange-500/25 flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed text-sm"
-            >
-              {isSubmitting ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              ) : (
-                'Send Message'
-              )}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+        )}
+      </BoardPageLayout>
+    </>
   );
 }

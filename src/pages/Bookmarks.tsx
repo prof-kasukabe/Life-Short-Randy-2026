@@ -1,151 +1,173 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { db } from '../lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { BookmarkItem } from '../types';
-import { Search, ChevronRight, ChevronDown, Bookmark } from 'lucide-react';
-import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
+import { Bookmark, Globe, ExternalLink, FolderKanban } from 'lucide-react';
+import { BoardPageLayout, BoardTabItem } from '../components/BoardPageLayout';
+
+const FALLBACK_BOOKMARKS: BookmarkItem[] = [
+  {
+    id: 'b-1',
+    title: 'Calm Tech Institute — Principles of Quiet Attention',
+    url: 'https://calmtech.com',
+    category: 'Design & Philosophy'
+  },
+  {
+    id: 'b-2',
+    title: 'Google AI Studio & Gemini SDK Documentation',
+    url: 'https://ai.google.dev',
+    category: 'AI Research'
+  },
+  {
+    id: 'b-3',
+    title: 'React 19 Architecture & Compiler Deep Dive',
+    url: 'https://react.dev',
+    category: 'Software Engineering'
+  },
+  {
+    id: 'b-4',
+    title: 'Arkitektur Sistem Terdistribusi & High Scalability',
+    url: 'https://highscalability.com',
+    category: 'Software Engineering'
+  },
+  {
+    id: 'b-5',
+    title: 'Linear Method — Practices for Building High-Craft Software',
+    url: 'https://linear.app/method',
+    category: 'Design & Philosophy'
+  },
+  {
+    id: 'b-6',
+    title: 'Papers With Code — Machine Learning Benchmarks',
+    url: 'https://paperswithcode.com',
+    category: 'AI Research'
+  }
+];
+
+const getDomain = (url: string) => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+};
 
 export function Bookmarks() {
-  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>(FALLBACK_BOOKMARKS);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     const fetchBookmarks = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'bookmarks'));
-        const items = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as BookmarkItem[];
-        setBookmarks(items.reverse());
+        if (!querySnapshot.empty) {
+          const items = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+          })) as BookmarkItem[];
+          setBookmarks(items.reverse());
+        }
       } catch (error) {
-        console.error("Error fetching bookmarks:", error);
-      } finally {
-        setLoading(false);
+        console.error('Error fetching bookmarks:', error);
       }
     };
-
     fetchBookmarks();
   }, []);
 
-  const filteredBookmarks = bookmarks.filter(bookmark => 
-    bookmark.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    bookmark.url.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const categories = useMemo(() => {
+    const counts: Record<string, number> = {};
+    bookmarks.forEach((b) => {
+      const cat = (b.category || 'General').trim();
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return Object.entries(counts).sort(([a], [b]) => a.localeCompare(b));
+  }, [bookmarks]);
 
-  const bookmarksByCategory = filteredBookmarks.reduce<Record<string, BookmarkItem[]>>((acc, bookmark) => {
-    let category = (bookmark.category || 'Uncategorized').trim();
-    // Find if a category with the same lowercase string already exists
-    const existingKey = Object.keys(acc).find(key => key.toLowerCase() === category.toLowerCase());
-    if (existingKey) {
-      category = existingKey;
-    }
-    
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(bookmark);
-    return acc;
-  }, {});
+  const tabs: BoardTabItem[] = [
+    { id: 'all', label: 'All Bookmarks', icon: Bookmark, badge: bookmarks.length },
+    ...categories.map(([cat, count]) => ({
+      id: cat,
+      label: cat,
+      icon: FolderKanban,
+      badge: count
+    }))
+  ];
 
-  const toggleCategory = (category: string) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }));
-  };
-
-  const totalBookmarks = bookmarks.length;
+  const filteredBookmarks = useMemo(() => {
+    return bookmarks.filter((b) => {
+      const cat = (b.category || 'General').trim();
+      const matchesCat = activeCategory === 'all' || cat === activeCategory;
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        b.title.toLowerCase().includes(q) ||
+        b.url.toLowerCase().includes(q) ||
+        cat.toLowerCase().includes(q);
+      return matchesCat && matchesSearch;
+    });
+  }, [bookmarks, activeCategory, searchQuery]);
 
   return (
-    <div className="pt-24 pb-32 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <>
       <Helmet>
-        <title>Bookmarks - Randy's Minimalist Portfolio</title>
-        <meta name="description" content="My curated list of bookmarks." />
-      </Helmet>
-      
-      <div className="flex flex-col md:flex-row gap-8 items-start mb-12">
-        <div className="shrink-0 animate-[float_6s_ease-in-out_infinite]">
-          <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-[#FDFBF7] dark:border-[#2C241B] shadow-xl rotate-3 hover:rotate-6 transition-transform">
-            <img src={avatarImg} alt="Randy Avatar - Bookmarks" className="w-full h-full object-cover" />
-          </div>
-        </div>
-        <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-[#E84634] dark:text-[#E84634] mb-2 block">Resource Directory</span>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-[#E84634] dark:text-[#E84634] flex items-center gap-3">
-            My {totalBookmarks} Bookmarks
-          </h1>
-          <p className="text-lg sm:text-xl text-[#E84634] dark:text-[#E84634]">
-            On AI Research, Business, Software, and Digital Media
-          </p>
-        </div>
-      </div>
-
-      <div className="mb-8 relative">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-          <Search size={18} className="text-[#E84634]" />
-        </div>
-        <input
-          type="text"
-          placeholder="Search title or URL..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all text-sm"
+        <title>Bookmarks Directory — Randy</title>
+        <meta
+          name="description"
+          content="Curated directory of bookmarks on AI Research, Software Engineering, and Digital Media."
         />
-      </div>
+      </Helmet>
 
-      {loading ? (
-        <div className="animate-pulse space-y-6">
-          {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="h-12 bg-zinc-100 dark:bg-zinc-900 rounded-xl w-full"></div>
+      <BoardPageLayout
+        pageTitle={`Knowledge Vault (${bookmarks.length} Bookmarks)`}
+        pageSubtitle="Curated references on AI Research, Software Architecture, Design Philosophy, and Digital Media."
+        breadcrumbCategory="Bookmarks"
+        tabs={tabs}
+        activeTab={activeCategory}
+        onTabChange={setActiveCategory}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search title or domain..."
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {filteredBookmarks.map((item, idx) => (
+            <a
+              key={item.id}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE]/80 dark:border-[#332D29] hover:border-[#E84634] p-4 flex flex-col justify-between min-h-[155px] transition-all shadow-2xs"
+            >
+              <div>
+                <div className="flex items-center justify-between text-[11px] font-mono text-[#6E655B] dark:text-[#A39B8F] mb-2">
+                  <span className="font-bold text-[#2A2521] dark:text-[#F5F2EB]">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <span className="inline-flex items-center gap-1 truncate max-w-[130px]">
+                    <Globe size={11} className="text-[#E84634] shrink-0" />
+                    <span className="truncate">{getDomain(item.url)}</span>
+                  </span>
+                </div>
+
+                <h3 className="text-sm sm:text-base font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors leading-snug mb-1.5">
+                  {item.title}
+                </h3>
+              </div>
+
+              <div className="mt-3 pt-2 border-t border-[#E0DACE]/50 dark:border-[#2E2824] flex items-center justify-between text-[10px] font-mono">
+                <span className="px-2 py-0.5 rounded bg-[#E84634]/12 text-[#E84634] font-semibold truncate max-w-[150px]">
+                  {item.category || 'General'}
+                </span>
+                <ExternalLink
+                  size={12}
+                  className="text-[#6E655B] group-hover:text-[#E84634] shrink-0"
+                />
+              </div>
+            </a>
           ))}
         </div>
-      ) : Object.keys(bookmarksByCategory).length === 0 ? (
-        <p className="text-[#E84634] dark:text-[#E84634]">No bookmarks found.</p>
-      ) : (
-        <div className="space-y-4">
-          {(Object.entries(bookmarksByCategory) as [string, BookmarkItem[]][]).sort(([a], [b]) => a.localeCompare(b)).map(([category, items]) => (
-            <div key={category} className="border-b border-zinc-200/80 dark:border-zinc-800/80 pb-4">
-              <button
-                onClick={() => toggleCategory(category)}
-                className="w-full flex items-center justify-between py-2 text-left group"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-[#E84634] dark:text-[#E84634] group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{category}</span>
-                  <span className="text-orange-600 dark:text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full text-xs font-semibold">({items.length})</span>
-                </div>
-                <div className="text-[#E84634] group-hover:text-orange-500 transition-colors">
-                  {expandedCategories[category] ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                </div>
-              </button>
-              
-              {expandedCategories[category] && (
-                <div className="mt-4 pl-4 border-l-2 border-orange-500/40 space-y-3">
-                  {items.map(item => (
-                    <a
-                      key={item.id}
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block group p-2.5 rounded-lg hover:bg-zinc-100/60 dark:hover:bg-zinc-900/60 transition-all"
-                    >
-                      <h3 className="font-semibold text-[#E84634] dark:text-[#E84634] group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors text-sm">
-                        {item.title}
-                      </h3>
-                      <p className="text-xs text-[#E84634] truncate mt-1">
-                        {item.url}
-                      </p>
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+      </BoardPageLayout>
+    </>
   );
 }

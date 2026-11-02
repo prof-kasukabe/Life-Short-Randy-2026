@@ -1,29 +1,92 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  ArrowRight, 
-  ExternalLink, 
-  Sparkles, 
-  Compass, 
-  Code2, 
-  Layers, 
-  CheckCircle2, 
-  Clock, 
-  Cpu, 
-  Database, 
-  Terminal, 
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Sparkles,
+  Compass,
+  Code2,
+  Layers,
+  CheckCircle2,
+  Cpu,
+  Database,
+  Terminal,
   ArrowUpRight,
-  ShieldCheck
+  ShieldCheck,
+  BookOpen,
+  PlaySquare,
+  Search,
+  PanelLeftClose,
+  PanelLeft,
+  Monitor,
+  Tablet,
+  Smartphone,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  Sun,
+  Moon,
+  Bookmark,
+  User,
+  Mail,
+  SlidersHorizontal,
+  LayoutGrid,
+  Library
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { collection, getDocs, limit, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { PortfolioItem, BlogPost, MediaItem, ITProject } from '../types';
-import { itProjectsData } from '../data';
+import { itProjectsData, blogData as fallbackBlogs } from '../data';
 import { Helmet } from 'react-helmet-async';
 import { getMediaThumbnail } from '../lib/media';
 import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
 import { GenerativeParticleCanvas } from '../components/GenerativeParticleCanvas';
-import { CuratedVerbalShelf } from '../components/CuratedVerbalShelf';
+import { CuratedVerbalShelf, DEFAULT_VERBAL_ARCHIVE } from '../components/CuratedVerbalShelf';
+import { useTheme } from '../ThemeProvider';
+
+type WorkspaceTab = 'identity' | 'verbal' | 'reading' | 'media' | 'projects' | 'tools';
+type ViewportSize = 'desktop' | 'tablet' | 'mobile';
+
+const FALLBACK_MEDIA: MediaItem[] = [
+  {
+    id: 'm-1',
+    title: 'The Architecture of Calm Technology & Digital Realism',
+    category: 'video',
+    platform: 'YouTube',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    date: 'Oct 2026',
+    description: 'Deep dive into designing software systems that respect human attention and endure beyond hype cycles.',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'm-2',
+    title: 'Late20s — Curated Lo-Fi & Ambient Focus Session',
+    category: 'audio',
+    platform: 'Spotify',
+    url: 'https://open.spotify.com/playlist/4RflVxxz20wZ6RKGvVItp5?si=JUVlCAjzQ6ew20AQH2H7Wg',
+    date: 'Sep 2026',
+    description: 'Late-night coding and reading soundtrack curated by Randy Ardiansyah.',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'm-3',
+    title: 'Building Distributed Full-Stack Systems with Go & React 19',
+    category: 'video',
+    platform: 'YouTube',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    date: 'Aug 2026',
+    description: 'Walkthrough of high-throughput telemetry ingestion, WebSockets, and 60fps canvas rendering.',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'm-4',
+    title: 'Notes on Solitude, Discipline & Software Craftsmanship',
+    category: 'audio',
+    platform: 'Podcast',
+    url: 'https://open.spotify.com/playlist/4RflVxxz20wZ6RKGvVItp5',
+    date: 'Jul 2026',
+    description: 'Audio monologue exploring the transition through the late twenties as an engineer and writer.',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=800&q=80'
+  }
+];
 
 const getDomain = (url: string) => {
   try {
@@ -34,491 +97,889 @@ const getDomain = (url: string) => {
 };
 
 export function Home() {
+  const { theme, toggleTheme } = useTheme();
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>('verbal');
+  const [viewport, setViewport] = useState<ViewportSize>('desktop');
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [quickSearch, setQuickSearch] = useState<string>('');
+  const [verbalViewMode, setVerbalViewMode] = useState<'shelf' | 'board'>('shelf');
+  const [selectedBlogPreview, setSelectedBlogPreview] = useState<BlogPost | null>(null);
+
   const [featuredWorks, setFeaturedWorks] = useState<PortfolioItem[]>([]);
-  const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
-  const [recentMedia, setRecentMedia] = useState<MediaItem[]>([]);
+  const [recentPosts, setRecentPosts] = useState<BlogPost[]>(fallbackBlogs);
+  const [recentMedia, setRecentMedia] = useState<MediaItem[]>(FALLBACK_MEDIA);
   const [itProjects, setItProjects] = useState<ITProject[]>(itProjectsData);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const portfoliosSnapshot = await getDocs(query(collection(db, 'portfolios'), orderBy('createdAt', 'desc'), limit(6)));
-        const works = portfoliosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PortfolioItem[];
-        setFeaturedWorks(works);
+        const portfoliosSnapshot = await getDocs(
+          query(collection(db, 'portfolios'), orderBy('createdAt', 'desc'))
+        );
+        if (!portfoliosSnapshot.empty) {
+          const works = portfoliosSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+          })) as PortfolioItem[];
+          setFeaturedWorks(works);
+        }
 
-        const blogsSnapshot = await getDocs(query(collection(db, 'blogs'), orderBy('createdAt', 'desc'), limit(3)));
-        const posts = blogsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as BlogPost[];
-        setRecentPosts(posts);
+        const blogsSnapshot = await getDocs(
+          query(collection(db, 'blogs'), orderBy('createdAt', 'desc'))
+        );
+        if (!blogsSnapshot.empty) {
+          const posts = blogsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+          })) as BlogPost[];
+          setRecentPosts(posts);
+        }
 
-        const mediaSnapshot = await getDocs(query(collection(db, 'media'), orderBy('createdAt', 'desc'), limit(2)));
-        const media = mediaSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as MediaItem[];
-        setRecentMedia(media);
+        const mediaSnapshot = await getDocs(
+          query(collection(db, 'media'), orderBy('createdAt', 'desc'))
+        );
+        if (!mediaSnapshot.empty) {
+          const media = mediaSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+          })) as MediaItem[];
+          setRecentMedia(media);
+        }
 
-        // Fetch IT projects from Firestore if available
         const itSnap = await getDocs(collection(db, 'it_projects'));
         if (!itSnap.empty) {
-          const dbProjects = itSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ITProject[];
-          const existingIds = new Set(dbProjects.map(p => p.id));
-          setItProjects([...dbProjects, ...itProjectsData.filter(p => !existingIds.has(p.id))]);
+          const dbProjects = itSnap.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+          })) as ITProject[];
+          const existingIds = new Set(dbProjects.map((p) => p.id));
+          setItProjects([
+            ...dbProjects,
+            ...itProjectsData.filter((p) => !existingIds.has(p.id))
+          ]);
         }
       } catch (error) {
-        console.error("Error fetching home data:", error);
+        console.error('Error fetching home data:', error);
       }
     };
     fetchData();
   }, []);
 
-  const ongoingProjects = itProjects.filter(p => p.status === 'in_progress').slice(0, 2);
-  const completedProjects = itProjects.filter(p => p.status === 'completed').slice(0, 2);
+  const verbalCount = Math.max(featuredWorks.length, DEFAULT_VERBAL_ARCHIVE.length);
+
+  const domainTabs: {
+    id: WorkspaceTab;
+    label: string;
+    icon: React.ElementType;
+    badge?: number;
+    fullRoute: string;
+  }[] = [
+    { id: 'verbal', label: 'Curated Verbal', icon: Library, badge: verbalCount, fullRoute: '/curated' },
+    { id: 'reading', label: 'Reading List', icon: BookOpen, badge: recentPosts.length, fullRoute: '/blog' },
+    { id: 'media', label: 'Watch & Listen', icon: PlaySquare, badge: recentMedia.length, fullRoute: '/media' },
+    { id: 'identity', label: 'Identity & Canvas', icon: Cpu, fullRoute: '/about' },
+    { id: 'projects', label: 'IT Projects', icon: Code2, badge: itProjects.length, fullRoute: '/projects' },
+    { id: 'tools', label: 'Creative Lab', icon: Sparkles, badge: 2, fullRoute: '/tools/dither' }
+  ];
+
+  const currentTabMeta = domainTabs.find((t) => t.id === activeTab) || domainTabs[0];
+
+  const handleCycleTab = (dir: -1 | 1) => {
+    const idx = domainTabs.findIndex((t) => t.id === activeTab);
+    const nextIdx = (idx + dir + domainTabs.length) % domainTabs.length;
+    setActiveTab(domainTabs[nextIdx].id);
+  };
+
+  // Filtered collections based on sidebar Quick Search
+  const filteredPosts = useMemo(() => {
+    if (!quickSearch.trim()) return recentPosts;
+    const q = quickSearch.toLowerCase();
+    return recentPosts.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        (p.excerpt || '').toLowerCase().includes(q) ||
+        (p.content || '').toLowerCase().includes(q)
+    );
+  }, [recentPosts, quickSearch]);
+
+  const filteredMedia = useMemo(() => {
+    if (!quickSearch.trim()) return recentMedia;
+    const q = quickSearch.toLowerCase();
+    return recentMedia.filter(
+      (m) =>
+        m.title.toLowerCase().includes(q) ||
+        (m.description || '').toLowerCase().includes(q) ||
+        (m.platform || '').toLowerCase().includes(q)
+    );
+  }, [recentMedia, quickSearch]);
+
+  const filteredProjects = useMemo(() => {
+    if (!quickSearch.trim()) return itProjects;
+    const q = quickSearch.toLowerCase();
+    return itProjects.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.techStack.some((t) => t.toLowerCase().includes(q))
+    );
+  }, [itProjects, quickSearch]);
+
+  const allVerbalItems = useMemo(() => {
+    const merged =
+      featuredWorks.length > 0
+        ? [
+            ...featuredWorks,
+            ...DEFAULT_VERBAL_ARCHIVE.filter(
+              (d) => !featuredWorks.some((f) => f.title.toLowerCase() === d.title.toLowerCase())
+            )
+          ]
+        : DEFAULT_VERBAL_ARCHIVE;
+    if (!quickSearch.trim()) return merged;
+    const q = quickSearch.toLowerCase();
+    return merged.filter(
+      (item) =>
+        item.title.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q) ||
+        (item.category || '').toLowerCase().includes(q)
+    );
+  }, [featuredWorks, quickSearch]);
+
+  const viewportWidthClass =
+    viewport === 'mobile'
+      ? 'max-w-[430px]'
+      : viewport === 'tablet'
+      ? 'max-w-[860px]'
+      : 'max-w-full';
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex-1 flex flex-col min-h-0 h-full overflow-hidden px-3 sm:px-6 pb-3 sm:pb-5 pt-2 select-none">
       <Helmet>
-        <title>Randy | Software Engineer &amp; Digital Realist</title>
-        <meta name="description" content="Randy Ardiansyah — Software Engineer & digital realist crafting full-stack web architectures, AI integrations, and high-performance digital systems." />
+        <title>Randy | The Late 20s — Interactive Workspace</title>
+        <meta
+          name="description"
+          content="Randy Ardiansyah — Software Engineer & Digital Realist. Explore Curated Verbal, Reading List, Watch & Listen, and IT Projects in one unified workspace."
+        />
       </Helmet>
 
-      {/* Hero Section */}
-      <section className="pt-20 pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full flex flex-col items-center text-center">
-          
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 border border-[#E0DACE] dark:border-[#3A332E] text-xs font-mono font-semibold text-[#E84634] mb-6">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Available for High-Impact Software &amp; IT Engineering
-          </div>
-
-          <h1 className="text-[12vw] sm:text-[9vw] lg:text-[130px] font-serif-display font-bold tracking-tighter text-[#E84634] mb-4 leading-[0.9] w-full text-center">
+      {/* Compact Top Headline & Viewport Switcher (BoardUI Header Style) */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mb-2.5 px-2 shrink-0">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl sm:text-2xl font-serif-display font-bold tracking-tight text-[#E84634] leading-none">
             The Late 20s
           </h1>
-          
-          <p className="text-sm sm:text-base md:text-lg font-sans-clean font-bold uppercase tracking-[0.18em] text-[#E84634] max-w-3xl leading-relaxed mb-6 px-4">
-            Diving deeper into the process, embracing the discomfort, and bending fate to create meaningful digital systems.
+          <span className="hidden md:inline text-[#E84634]/35">·</span>
+          <p className="hidden md:block text-xs font-sans-clean text-[#E84634]/80 truncate max-w-md">
+            Diving deeper into the process, embracing discomfort, and crafting meaningful digital systems.
           </p>
+        </div>
 
-          <p className="text-xs sm:text-sm text-[#E84634]/80 max-w-2xl leading-relaxed mb-10 px-4">
-            Software Engineer &amp; Digital Realist. Integrating modern full-stack frameworks, AI workflow engines, and deliberate interactive interfaces.
-          </p>
-
-          {/* Quick Action Navigation */}
-          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-10 px-4">
-            <Link 
-              to="/projects" 
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#E84634] text-white hover:opacity-90 font-bold uppercase tracking-widest text-xs sm:text-sm rounded-full transition-all shadow-md hover:shadow-lg"
-            >
-              <Code2 size={16} />
-              Lihat Proyek TI
-            </Link>
-            <Link 
-              to="/curated" 
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-[#E84634] text-[#E84634] hover:bg-[#E84634] hover:text-white font-bold uppercase tracking-widest text-xs sm:text-sm rounded-full transition-colors"
-            >
-              <Layers size={16} />
-              Curated Space
-            </Link>
-            <Link 
-              to="/tools/dither" 
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 border border-[#E0DACE] dark:border-[#3A332E] text-[#E84634] hover:border-[#E84634] font-semibold uppercase tracking-wider text-xs rounded-full transition-colors"
-            >
-              <Sparkles size={15} />
-              Dither Tool
-            </Link>
-            <Link 
-              to="/tools/scratch" 
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 border border-[#E0DACE] dark:border-[#3A332E] text-[#E84634] hover:border-[#E84634] font-semibold uppercase tracking-wider text-xs rounded-full transition-colors"
-            >
-              <Compass size={15} />
-              Creative Scratch
-            </Link>
-          </div>
-
-          {/* Spotify Widget */}
-          <a 
-            href="https://open.spotify.com/playlist/4RflVxxz20wZ6RKGvVItp5?si=JUVlCAjzQ6ew20AQH2H7Wg"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full max-w-[340px] mx-auto mb-14 flex items-center justify-between p-2.5 border border-[#E0DACE] dark:border-[#3A332E] hover:border-[#E84634]/60 bg-white/60 dark:bg-[#1E1A18]/60 backdrop-blur-md rounded-2xl transition-all shadow-sm group overflow-hidden"
+        {/* Desktop / Tablet / Mobile Switcher Pill */}
+        <div className="flex items-center gap-1 p-1 rounded-full bg-[#E0DACE]/45 dark:bg-[#2A2420] border border-[#E0DACE] dark:border-[#3A332E]">
+          <button
+            type="button"
+            onClick={() => setViewport('desktop')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer ${
+              viewport === 'desktop'
+                ? 'bg-white dark:bg-[#1E1A18] text-[#E84634] shadow-sm font-semibold'
+                : 'text-[#E84634]/65 hover:text-[#E84634]'
+            }`}
           >
-            <div className="flex flex-col text-left pl-3 py-1">
-              <div className="flex items-center gap-1.5 mb-1">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#1DB954]" fill="currentColor">
-                  <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.241 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.6.18-1.2.72-1.38 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-                </svg>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#E84634]/70">Spotify</span>
-              </div>
-              <span className="text-lg font-serif-display font-bold text-[#E84634] leading-none mb-1">Late20s</span>
-              <span className="text-[11px] text-[#E84634]/60 font-medium">Curated by Randy</span>
-            </div>
-            <div className="w-[72px] h-[72px] shrink-0 rounded-[10px] overflow-hidden border border-[#E0DACE]/50 dark:border-[#3A332E]/50">
-              <img 
-                src={avatarImg} 
-                alt="Late20s Playlist Cover" 
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-              />
-            </div>
-          </a>
-
-          {/* Generative Particle Canvas Showcase */}
-          <div className="w-full">
-            <GenerativeParticleCanvas />
-          </div>
+            <Monitor size={12} />
+            <span>Desktop</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewport('tablet')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer ${
+              viewport === 'tablet'
+                ? 'bg-white dark:bg-[#1E1A18] text-[#E84634] shadow-sm font-semibold'
+                : 'text-[#E84634]/65 hover:text-[#E84634]'
+            }`}
+          >
+            <Tablet size={12} />
+            <span>Tablet</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewport('mobile')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer ${
+              viewport === 'mobile'
+                ? 'bg-white dark:bg-[#1E1A18] text-[#E84634] shadow-sm font-semibold'
+                : 'text-[#E84634]/65 hover:text-[#E84634]'
+            }`}
+          >
+            <Smartphone size={12} />
+            <span>Mobile</span>
+          </button>
         </div>
-      </section>
+      </div>
 
-      {/* FEATURED IT PROJECTS SECTION (Highlighting Ongoing & Completed) */}
-      <section className="py-24 border-t border-[#E0DACE] dark:border-[#3A332E] bg-[#E0DACE]/10 dark:bg-[#2C241B]/15">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 px-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2 text-xs font-mono font-bold uppercase tracking-widest text-[#E84634]">
-                <Code2 size={16} />
-                <span>Teknologi Informasi &amp; Rekayasa Sistem</span>
-              </div>
-              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">
-                Featured IT Projects<span className="text-[#E84634]">.</span>
-              </h2>
-              <p className="text-sm sm:text-base text-[#E84634]/80 mt-2 max-w-xl font-light">
-                Sorotan inisiatif perangkat lunak aktif dan sistem komputasi terdistribusi yang telah selesai diimplementasikan.
-              </p>
-            </div>
-            <Link 
-              to="/projects" 
-              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E84634] hover:opacity-75 transition-opacity pb-1 border-b-2 border-[#E84634]"
-            >
-              <span>Buka Halaman Proyek TI Lengkap ({itProjects.length})</span>
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
-            {/* Ongoing Projects Spotlight */}
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between pb-2 border-b border-[#E0DACE] dark:border-[#3A332E]">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-                  </span>
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                    Sedang Dikerjakan (In Progress)
-                  </span>
-                </div>
-                <span className="text-xs font-medium text-[#E84634]/60">Fase Pengembangan</span>
-              </div>
-
-              {ongoingProjects.map((p) => (
-                <div 
-                  key={p.id}
-                  className="bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E] hover:border-[#E84634]/60 rounded-2xl p-6 transition-all shadow-sm flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between text-xs mb-2">
-                      <span className="font-semibold text-[#E84634]/80">{p.category}</span>
-                      <span className="font-mono text-[#E84634]/60">{p.timeline}</span>
-                    </div>
-
-                    <h3 className="text-xl font-serif-display font-bold text-[#E84634] mb-2 leading-tight">
-                      {p.title}
-                    </h3>
-                    <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] line-clamp-3 mb-4 leading-relaxed">
-                      {p.description}
-                    </p>
-
-                    {p.progressPercentage && (
-                      <div className="mb-4">
-                        <div className="flex justify-between text-[11px] font-semibold text-amber-700 dark:text-amber-300 mb-1">
-                          <span>Progress</span>
-                          <span>{p.progressPercentage}%</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-amber-500/20 rounded-full overflow-hidden">
-                          <div className="h-full bg-amber-500 rounded-full" style={{ width: `${p.progressPercentage}%` }} />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {p.techStack.slice(0, 4).map((tech) => (
-                        <span key={tech} className="px-2 py-0.5 text-[11px] font-mono rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Link 
-                    to="/projects" 
-                    className="text-xs font-bold uppercase tracking-wider text-[#E84634] hover:underline flex items-center gap-1 pt-3 border-t border-[#E0DACE]/60 dark:border-[#3A332E]/60"
-                  >
-                    Pelajari Selengkapnya <ArrowUpRight size={13} />
-                  </Link>
-                </div>
-              ))}
-            </div>
-
-            {/* Completed Projects Spotlight */}
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between pb-2 border-b border-[#E0DACE] dark:border-[#3A332E]">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 size={14} className="text-emerald-500" />
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                    Selesai Dikerjakan (Delivered)
-                  </span>
-                </div>
-                <span className="text-xs font-medium text-[#E84634]/60">Produksi &amp; Rilis</span>
-              </div>
-
-              {completedProjects.map((p) => (
-                <div 
-                  key={p.id}
-                  className="bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E] hover:border-[#E84634]/60 rounded-2xl p-6 transition-all shadow-sm flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between text-xs mb-2">
-                      <span className="font-semibold text-[#E84634]/80">{p.category}</span>
-                      <span className="font-mono text-[#E84634]/60">{p.timeline}</span>
-                    </div>
-
-                    <h3 className="text-xl font-serif-display font-bold text-[#E84634] mb-2 leading-tight">
-                      {p.title}
-                    </h3>
-                    <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] line-clamp-3 mb-4 leading-relaxed">
-                      {p.description}
-                    </p>
-
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {p.techStack.slice(0, 4).map((tech) => (
-                        <span key={tech} className="px-2 py-0.5 text-[11px] font-mono rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Link 
-                    to="/projects" 
-                    className="text-xs font-bold uppercase tracking-wider text-[#E84634] hover:underline flex items-center gap-1 pt-3 border-t border-[#E0DACE]/60 dark:border-[#3A332E]/60"
-                  >
-                    Cek Arsitektur &amp; Demo <ArrowUpRight size={13} />
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TECHNICAL COMPETENCIES / CORE ARCHITECTURE */}
-      <section className="py-20 border-t border-[#E0DACE] dark:border-[#3A332E]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full">
-          <div className="max-w-2xl mb-12 px-4">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#E84634] block mb-2">
-              Kemampuan Teknis &amp; Rekayasa
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-serif-display font-bold tracking-tight text-[#E84634]">
-              Core Technical Competencies
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
-            <div className="p-6 rounded-2xl bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E]">
-              <div className="flex items-center gap-2 mb-3 text-[#E84634]">
-                <Cpu size={18} />
-                <h3 className="font-serif-display font-bold text-base">Frontend Architecture</h3>
-              </div>
-              <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] leading-relaxed mb-4">
-                High-performance SPAs and SSR apps with typed interfaces, accessible components, and smooth 60fps canvas graphics.
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {['React 19', 'TypeScript', 'Tailwind', 'Next.js', 'Canvas API'].map(t => (
-                  <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E]">
-              <div className="flex items-center gap-2 mb-3 text-[#E84634]">
-                <Terminal size={18} />
-                <h3 className="font-serif-display font-bold text-base">Backend &amp; Microservices</h3>
-              </div>
-              <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] leading-relaxed mb-4">
-                Scalable REST, gRPC, and WebSocket backends designed with rate-limiting, modular service boundaries, and caching.
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {['Node.js', 'Python FastAPI', 'Go (Golang)', 'Express', 'Redis'].map(t => (
-                  <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E]">
-              <div className="flex items-center gap-2 mb-3 text-[#E84634]">
-                <Database size={18} />
-                <h3 className="font-serif-display font-bold text-base">Databases &amp; Cloud</h3>
-              </div>
-              <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] leading-relaxed mb-4">
-                Relational schema modeling, real-time NoSQL synchronization, time-series telemetry storage, and containerization.
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {['PostgreSQL', 'TimescaleDB', 'Firestore', 'Docker', 'Git/CI'].map(t => (
-                  <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#FAFAF5] dark:bg-[#1E1A18] border border-[#E0DACE] dark:border-[#3A332E]">
-              <div className="flex items-center gap-2 mb-3 text-[#E84634]">
-                <ShieldCheck size={18} />
-                <h3 className="font-serif-display font-bold text-base">AI &amp; Zero-Trust</h3>
-              </div>
-              <p className="text-xs text-[#4A3F35] dark:text-[#E0DACE] leading-relaxed mb-4">
-                Integrating multimodal LLMs into operational workflows, WebAuthn biometrics, and secure RBAC policy layers.
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {['Gemini SDK', 'WebAuthn', 'JWT Auth', 'Prompt Eng', 'RBAC'].map(t => (
-                  <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E0DACE]/40 dark:bg-[#3A332E]/40 text-[#4A3F35] dark:text-[#E0DACE]">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Editorial Work (Curated Journal) */}
-      <section className="py-24 border-t border-[#E0DACE] dark:border-[#3A332E]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12 px-4">
-            <div>
-              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">Curated Verbal</h2>
-              <p className="text-[#E84634] font-medium italic pb-1">A selection of stories and visual projects crafted carefully over time.</p>
-            </div>
-            <Link to="/curated" className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E84634] hover:opacity-75 transition-opacity">
-              Lihat Semua Galeri &rarr;
-            </Link>
-          </div>
-
-          <div className="px-2 sm:px-4">
-            <CuratedVerbalShelf items={featuredWorks} />
-          </div>
-        </div>
-      </section>
-
-      {/* Recent Posts / Reading List */}
-      <section className="py-24 border-t border-[#E0DACE] dark:border-[#3A332E]">
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="flex justify-between items-end mb-16">
-            <div>
-              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">Reading List</h2>
-            </div>
-            <Link to="/blog" className="hidden sm:inline-flex items-center text-sm font-bold uppercase tracking-widest text-[#E84634] hover:opacity-70 transition-colors">
-              Lihat Semua Tulisan &rarr;
-            </Link>
-          </div>
-
-          <div className="space-y-10">
-            {recentPosts.map((post) => (
-              <article key={post.id} className="group">
-                {post.url ? (
-                  <a href={post.url} target="_blank" rel="noopener noreferrer" className="block">
-                    <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-2 border-b border-[#E0DACE] dark:border-[#3A332E] pb-6">
-                      <h3 className="text-xl md:text-2xl font-serif-display font-medium text-[#E84634] group-hover:opacity-70 transition-opacity flex items-center gap-3">
-                        {post.iconUrl && (
-                          <img src={post.iconUrl} alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
-                        )}
-                        {post.title}
-                        <ExternalLink size={16} className="text-[#E84634]/50 group-hover:text-[#E84634] transition-colors" />
-                      </h3>
-                      <div className="flex items-center gap-4 text-sm shrink-0">
-                        <span className="text-[#E84634]/70 uppercase tracking-widest text-xs font-bold">{getDomain(post.url)}</span>
-                        <time className="text-[#E84634]/60 font-serif-display italic text-lg">{post.date}</time>
-                      </div>
-                    </div>
-                  </a>
-                ) : (
-                  <Link to={`/blog/${post.id}`} className="block">
-                    <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-2 border-b border-[#E0DACE] dark:border-[#3A332E] pb-6">
-                      <h3 className="text-xl md:text-2xl font-serif-display font-medium text-[#E84634] group-hover:opacity-70 transition-opacity flex items-center gap-3">
-                        {post.iconUrl && (
-                          <img src={post.iconUrl} alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
-                        )}
-                        {post.title}
-                      </h3>
-                      <time className="text-[#E84634]/60 font-serif-display italic text-lg shrink-0">{post.date}</time>
-                    </div>
-                  </Link>
-                )}
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Recent Media */}
-      <section className="py-24 border-t border-[#E0DACE] dark:border-[#3A332E]">
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="flex justify-between items-end mb-16">
-            <div>
-              <h2 className="text-4xl sm:text-5xl font-serif-display font-bold tracking-tight text-[#E84634]">Watch &amp; Listen</h2>
-            </div>
-            <Link to="/media" className="hidden sm:inline-flex items-center text-sm font-bold uppercase tracking-widest text-[#E84634] hover:opacity-70 transition-colors">
-              Lihat Semua &rarr;
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
-            {recentMedia.map((item) => {
-              const thumbnail = getMediaThumbnail(item.url, item.thumbnailUrl);
+      {/* OUTER BOARD-UI FRAME (Fills remaining height without page scrolling) */}
+      <div
+        className={`flex-1 min-h-0 w-full ${viewportWidthClass} mx-auto rounded-[1.5rem] border border-[#E0DACE] dark:border-[#3A332E] bg-white/80 dark:bg-[#171412]/90 backdrop-blur-md shadow-xl flex flex-col overflow-hidden transition-all duration-300`}
+      >
+        {/* Top Domain Tabs Bar (Like Agentic chat | Image generation | Calendar | Live preview) */}
+        <div className="h-12 px-3 sm:px-5 border-b border-[#E0DACE]/80 dark:border-[#2E2824] flex items-center justify-between gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden shrink-0 bg-[#FAFAF5]/90 dark:bg-[#1B1815]">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            {domainTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
               return (
-                <a 
-                  key={item.id} 
-                  href={item.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="group block"
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setSelectedBlogPreview(null);
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+                    isActive
+                      ? 'bg-[#E84634]/15 text-[#E84634] font-semibold ring-1 ring-[#E84634]/30'
+                      : 'text-[#4A3F35]/75 dark:text-[#E0DACE]/70 hover:text-[#E84634] hover:bg-[#E84634]/5'
+                  }`}
                 >
-                  <div className="flex flex-col sm:flex-row gap-6 items-start">
-                    {thumbnail && (
-                      <div className="w-full sm:w-32 aspect-[3/4] sm:aspect-square shrink-0 bg-[#E0DACE]/30 dark:bg-[#3A332E]/30 relative rounded-2xl overflow-hidden group-hover:opacity-90 transition-opacity shadow-sm">
-                        <img 
-                          src={thumbnail} 
-                          alt={item.title} 
-                          className="w-full h-full object-cover" 
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            const target = e.target as HTMLElement;
-                            if (target.parentElement) {
-                              target.parentElement.style.display = 'none';
-                            }
-                          }}
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0 w-full pt-2">
-                      <div className="flex justify-between items-start gap-2 mb-1">
-                        <h3 className="text-xl font-serif-display font-medium text-[#E84634] group-hover:opacity-70 transition-colors leading-snug">{item.title}</h3>
-                        <ExternalLink size={16} className="text-[#E84634]/50 group-hover:text-[#E84634] transition-colors shrink-0 mt-1" />
-                      </div>
-                      <div className="flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-widest text-[#E84634]/70">
-                        <span className="capitalize">{item.category || 'video'}</span>
-                        <span className="opacity-50">&middot;</span>
-                        <span>{item.platform}</span>
-                      </div>
-                      {item.description && (
-                        <p className="text-sm text-[#E84634]/80 line-clamp-2 leading-relaxed font-medium">{item.description}</p>
-                      )}
-                    </div>
-                  </div>
-                </a>
+                  <Icon size={13} className="text-[#E84634]" />
+                  <span>{tab.label}</span>
+                </button>
               );
             })}
           </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to={currentTabMeta.fullRoute}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-[#E0DACE] dark:border-[#3A332E] bg-white dark:bg-[#24201D] text-[11px] font-medium text-[#E84634] hover:border-[#E84634] transition-colors shadow-2xs"
+            >
+              <ExternalLink size={11} />
+              <span className="hidden sm:inline">Live preview</span>
+            </Link>
+          </div>
         </div>
-      </section>
+
+        {/* INNER 2-PANE WORKSPACE (Left Sidebar + Right Main Stage) */}
+        <div className="flex-1 min-h-0 flex overflow-hidden">
+          {/* LEFT SIDEBAR */}
+          {sidebarOpen && viewport !== 'mobile' && (
+            <aside className="w-56 lg:w-60 shrink-0 border-r border-[#E0DACE]/80 dark:border-[#2E2824] bg-[#F6F4EE]/90 dark:bg-[#1B1815]/90 flex flex-col justify-between p-3 select-none">
+              <div className="space-y-3">
+                {/* User Identity Row */}
+                <div className="flex items-center justify-between px-1.5 py-1">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <img
+                      src={avatarImg}
+                      alt="Randy Ardiansyah"
+                      className="w-6 h-6 rounded-full object-cover border border-[#E84634]/40 shrink-0"
+                    />
+                    <span className="text-xs font-semibold text-[#2A2521] dark:text-[#F5F2EB] truncate">
+                      Randy Ardiansyah
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSidebarOpen(false)}
+                    className="p-1 rounded-md text-[#6E655B] hover:text-[#E84634] transition-colors cursor-pointer"
+                    title="Collapse Sidebar"
+                  >
+                    <PanelLeftClose size={14} />
+                  </button>
+                </div>
+
+                {/* Quick Search Bar */}
+                <div className="relative">
+                  <Search
+                    size={13}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#6E655B]"
+                  />
+                  <input
+                    type="text"
+                    value={quickSearch}
+                    onChange={(e) => setQuickSearch(e.target.value)}
+                    placeholder="Quick Search"
+                    className="w-full pl-8 pr-8 py-1.5 rounded-lg bg-[#EAE6DC]/70 dark:bg-[#25211E] border border-transparent focus:border-[#E84634]/40 text-xs text-[#2A2521] dark:text-[#F5F2EB] placeholder-[#6E655B] outline-none transition-all"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono px-1 py-0.5 rounded bg-white/80 dark:bg-[#171412] text-[#6E655B] border border-[#E0DACE] dark:border-[#3A332E]">
+                    ⌘K
+                  </span>
+                </div>
+
+                {/* Sidebar Navigation List */}
+                <nav className="space-y-0.5 pt-1">
+                  {domainTabs.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveTab(item.id);
+                          setSelectedBlogPreview(null);
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                          isActive
+                            ? 'bg-[#E84634] text-white shadow-xs font-semibold'
+                            : 'text-[#4A3F35] dark:text-[#D8D0C5] hover:bg-[#EAE6DC]/70 dark:hover:bg-[#25211E]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 truncate">
+                          <Icon size={14} className={isActive ? 'text-white' : 'text-[#E84634]'} />
+                          <span className="truncate">{item.label}</span>
+                        </div>
+                        {item.badge !== undefined && (
+                          <span
+                            className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                              isActive
+                                ? 'bg-white/20 text-white'
+                                : 'bg-[#E0DACE]/70 dark:bg-[#2A2420] text-[#6E655B] dark:text-[#A39B8F]'
+                            }`}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              {/* Bottom Sidebar Controls: Theme Switch, Quick Links, Spotify Card */}
+              <div className="space-y-2.5 pt-3 border-t border-[#E0DACE]/80 dark:border-[#2E2824]">
+                {/* Light / Dark Pill Switch */}
+                <div className="inline-flex items-center p-0.5 rounded-full bg-[#EAE6DC] dark:bg-[#25211E] border border-[#E0DACE] dark:border-[#3A332E]">
+                  <button
+                    type="button"
+                    onClick={() => theme === 'dark' && toggleTheme()}
+                    className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                      theme === 'light'
+                        ? 'bg-white text-[#E84634] shadow-2xs'
+                        : 'text-[#6E655B] hover:text-[#E84634]'
+                    }`}
+                    aria-label="Light mode"
+                  >
+                    <Sun size={12} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => theme === 'light' && toggleTheme()}
+                    className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                      theme === 'dark'
+                        ? 'bg-[#171412] text-[#E84634] shadow-2xs'
+                        : 'text-[#6E655B] hover:text-[#E84634]'
+                    }`}
+                    aria-label="Dark mode"
+                  >
+                    <Moon size={12} />
+                  </button>
+                </div>
+
+                {/* Secondary Quick Routes */}
+                <div className="space-y-0.5 text-xs text-[#6E655B] dark:text-[#A39B8F]">
+                  <Link
+                    to="/bookmarks"
+                    className="flex items-center gap-2 px-2 py-1 rounded-md hover:text-[#E84634] transition-colors"
+                  >
+                    <Bookmark size={13} />
+                    <span>Bookmarks</span>
+                  </Link>
+                  <Link
+                    to="/contact"
+                    className="flex items-center gap-2 px-2 py-1 rounded-md hover:text-[#E84634] transition-colors"
+                  >
+                    <Mail size={13} />
+                    <span>Contact &amp; Collab</span>
+                  </Link>
+                </div>
+
+                {/* Spotify Late20s Mini Team Card (Matches bottom-left Board team card) */}
+                <a
+                  href="https://open.spotify.com/playlist/4RflVxxz20wZ6RKGvVItp5?si=JUVlCAjzQ6ew20AQH2H7Wg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-[#231F1C] border border-[#E0DACE] dark:border-[#3A332E] hover:border-[#E84634]/60 transition-all group"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-[#E84634] text-white flex items-center justify-center font-serif-display font-bold text-sm shrink-0">
+                      R.
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-semibold text-[#2A2521] dark:text-[#F5F2EB] truncate">
+                        Late20s · Spotify
+                      </div>
+                      <div className="text-[10px] text-[#6E655B] dark:text-[#A39B8F] truncate">
+                        Curated by Randy
+                      </div>
+                    </div>
+                  </div>
+                  <ArrowUpRight
+                    size={13}
+                    className="text-[#6E655B] group-hover:text-[#E84634] shrink-0"
+                  />
+                </a>
+              </div>
+            </aside>
+          )}
+
+          {/* RIGHT MAIN WORKSPACE STAGE */}
+          <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-[#FAFAF5] dark:bg-[#191614] overflow-hidden">
+            {/* Stage Subheader: Breadcrumb + Title + Prev/Next Switcher + Primary CTA */}
+            <div className="px-4 sm:px-6 py-3 border-b border-[#E0DACE]/80 dark:border-[#2E2824] flex flex-wrap items-center justify-between gap-3 shrink-0 bg-white/60 dark:bg-[#1E1A18]/60">
+              <div className="flex items-center gap-2.5">
+                {(!sidebarOpen || viewport === 'mobile') && (
+                  <button
+                    type="button"
+                    onClick={() => setSidebarOpen(true)}
+                    className="p-1.5 rounded-lg border border-[#E0DACE] dark:border-[#3A332E] text-[#E84634] hover:bg-[#E84634]/10 transition-colors cursor-pointer"
+                    title="Show Sidebar"
+                  >
+                    <PanelLeft size={14} />
+                  </button>
+                )}
+
+                <div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#6E655B] dark:text-[#A39B8F]">
+                    <span className="font-semibold text-[#E84634]">Randy.</span>
+                    <span>&gt;</span>
+                    <span>The Late 20s</span>
+                    <span>&gt;</span>
+                    <span className="text-[#2A2521] dark:text-[#F5F2EB] font-medium">
+                      {currentTabMeta.label}
+                    </span>
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] leading-tight">
+                    {currentTabMeta.label}
+                  </h2>
+                </div>
+              </div>
+
+              {/* Right Controls: View Switcher + Domain Prev/Next Pill + Action Button */}
+              <div className="flex items-center gap-2">
+                {activeTab === 'verbal' && (
+                  <div className="inline-flex items-center p-0.5 rounded-lg border border-[#E0DACE] dark:border-[#3A332E] bg-[#F5F2EB] dark:bg-[#24201D]">
+                    <button
+                      type="button"
+                      onClick={() => setVerbalViewMode('shelf')}
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-mono uppercase transition-all cursor-pointer ${
+                        verbalViewMode === 'shelf'
+                          ? 'bg-[#E84634] text-white font-semibold'
+                          : 'text-[#6E655B] dark:text-[#A39B8F] hover:text-[#E84634]'
+                      }`}
+                    >
+                      3D Shelf
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVerbalViewMode('board')}
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-mono uppercase transition-all cursor-pointer ${
+                        verbalViewMode === 'board'
+                          ? 'bg-[#E84634] text-white font-semibold'
+                          : 'text-[#6E655B] dark:text-[#A39B8F] hover:text-[#E84634]'
+                      }`}
+                    >
+                      Board Grid
+                    </button>
+                  </div>
+                )}
+
+                {/* Prev / Current / Next Domain Stepper (Matches `< August 2026 >`) */}
+                <div className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border border-[#E0DACE] dark:border-[#3A332E] bg-white dark:bg-[#24201D] text-xs font-medium text-[#2A2521] dark:text-[#F5F2EB]">
+                  <button
+                    type="button"
+                    onClick={() => handleCycleTab(-1)}
+                    className="p-0.5 text-[#6E655B] hover:text-[#E84634] transition-colors cursor-pointer"
+                    aria-label="Previous domain"
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  <span className="min-w-[105px] text-center text-[11px] font-semibold">
+                    {currentTabMeta.label}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleCycleTab(1)}
+                    className="p-0.5 text-[#6E655B] hover:text-[#E84634] transition-colors cursor-pointer"
+                    aria-label="Next domain"
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+
+                <Link
+                  to={currentTabMeta.fullRoute}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#E84634] text-white text-xs font-semibold hover:opacity-90 transition-opacity shadow-xs"
+                >
+                  <span>Buka Halaman</span>
+                  <ArrowUpRight size={13} />
+                </Link>
+              </div>
+            </div>
+
+            {/* STAGE BODY (Internally scrollable if content overflows, keeping outer page locked) */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#E84634]/25">
+              {/* 1. CURATED VERBAL TAB */}
+              {activeTab === 'verbal' && (
+                <div className="h-full flex flex-col">
+                  {verbalViewMode === 'shelf' ? (
+                    <CuratedVerbalShelf items={featuredWorks} searchQuery={quickSearch} />
+                  ) : (
+                    /* BoardUI Calendar-Style Matrix for Curated Verbal */
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                      {allVerbalItems.map((item, idx) => (
+                        <div
+                          key={item.id}
+                          onClick={() => setVerbalViewMode('shelf')}
+                          className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE]/80 dark:border-[#332D29] hover:border-[#E84634] p-3.5 flex flex-col justify-between min-h-[175px] transition-all cursor-pointer shadow-2xs"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between text-[11px] font-mono text-[#6E655B] dark:text-[#A39B8F] mb-2">
+                              <span className="font-bold text-[#2A2521] dark:text-[#F5F2EB]">
+                                {String(idx + 1).padStart(2, '0')}
+                              </span>
+                              <span>{item.date || '2026'}</span>
+                            </div>
+                            <h3 className="text-base font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors leading-snug mb-1.5">
+                              {item.title}
+                            </h3>
+                            <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 leading-relaxed">
+                              {item.description}
+                            </p>
+                          </div>
+
+                          <div className="mt-3 pt-2 border-t border-[#E0DACE]/50 dark:border-[#2E2824] flex items-center justify-between text-[10px] font-mono">
+                            <span className="px-2 py-0.5 rounded bg-[#E84634]/12 text-[#E84634] font-semibold">
+                              {item.category || 'Verbal'}
+                            </span>
+                            <span className="text-[#6E655B] dark:text-[#A39B8F] group-hover:text-[#E84634]">
+                              Inspect 3D &rarr;
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 2. READING LIST TAB (BoardUI Calendar/Card Grid + Instant Reader) */}
+              {activeTab === 'reading' && (
+                <div className="h-full flex flex-col">
+                  {selectedBlogPreview ? (
+                    <div className="bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] rounded-2xl p-6 sm:p-8 max-w-3xl mx-auto w-full">
+                      <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#E0DACE] dark:border-[#332D29]">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedBlogPreview(null)}
+                          className="text-xs font-mono uppercase tracking-wider text-[#E84634] hover:underline cursor-pointer"
+                        >
+                          &larr; Back to Reading Board
+                        </button>
+                        <span className="text-xs font-serif-display italic text-[#6E655B] dark:text-[#A39B8F]">
+                          {selectedBlogPreview.date} · {selectedBlogPreview.readTime || '5 min read'}
+                        </span>
+                      </div>
+                      <h3 className="text-3xl sm:text-4xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] mb-4">
+                        {selectedBlogPreview.title}
+                      </h3>
+                      <p className="text-sm sm:text-base text-[#4A3F35] dark:text-[#D8D0C5] leading-relaxed whitespace-pre-line mb-6">
+                        {selectedBlogPreview.content ||
+                          selectedBlogPreview.excerpt ||
+                          'Reflections and field notes written by Randy Ardiansyah on minimalist engineering, calm technology, and deliberate creative systems.'}
+                      </p>
+                      <div className="flex items-center gap-3">
+                        {selectedBlogPreview.url ? (
+                          <a
+                            href={selectedBlogPreview.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#E84634] text-white text-xs font-semibold"
+                          >
+                            <span>Read External Source ({getDomain(selectedBlogPreview.url)})</span>
+                            <ExternalLink size={13} />
+                          </a>
+                        ) : (
+                          <Link
+                            to={`/blog/${selectedBlogPreview.id}`}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#E84634] text-white text-xs font-semibold"
+                          >
+                            <span>Open Full Article Page</span>
+                            <ArrowUpRight size={13} />
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Board Column Headers (Like Sun / Mon / Tue / Wed in the BoardUI Calendar) */}
+                      <div className="hidden lg:grid grid-cols-4 gap-3 px-2 pb-2 text-[11px] font-mono uppercase tracking-wider text-[#6E655B] dark:text-[#A39B8F]">
+                        <span>01 · Essays &amp; Notes</span>
+                        <span>02 · Architecture</span>
+                        <span>03 · Reflections</span>
+                        <span>04 · Field Journal</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {filteredPosts.map((post, idx) => {
+                          const tagColors = [
+                            'bg-[#E84634]/12 text-[#E84634]',
+                            'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+                            'bg-amber-500/15 text-amber-700 dark:text-amber-300',
+                            'bg-sky-500/15 text-sky-700 dark:text-sky-300'
+                          ];
+                          const badgeClass = tagColors[idx % tagColors.length];
+
+                          return (
+                            <article
+                              key={post.id}
+                              onClick={() => setSelectedBlogPreview(post)}
+                              className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE]/80 dark:border-[#332D29] hover:border-[#E84634] p-4 flex flex-col justify-between min-h-[170px] transition-all cursor-pointer shadow-2xs"
+                            >
+                              <div>
+                                <div className="flex items-center justify-between text-xs mb-2">
+                                  <span className="font-mono font-bold text-[#2A2521] dark:text-[#F5F2EB]">
+                                    {String(idx + 1).padStart(2, '0')}
+                                  </span>
+                                  <time className="text-[11px] font-serif-display italic text-[#6E655B] dark:text-[#A39B8F]">
+                                    {post.date}
+                                  </time>
+                                </div>
+
+                                <h3 className="text-base font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors leading-snug mb-2">
+                                  {post.title}
+                                </h3>
+
+                                {post.excerpt && (
+                                  <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 leading-relaxed">
+                                    {post.excerpt}
+                                  </p>
+                                )}
+                              </div>
+
+                              <div className="mt-3 pt-2 flex flex-col gap-1">
+                                <div
+                                  className={`w-full px-2.5 py-1 rounded-md text-[10px] font-mono font-semibold flex items-center justify-between ${badgeClass}`}
+                                >
+                                  <span className="truncate">
+                                    {post.url ? getDomain(post.url) : 'Randy Journal'}
+                                  </span>
+                                  <span>{post.readTime || '5m'}</span>
+                                </div>
+                              </div>
+                            </article>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* 3. WATCH & LISTEN TAB (BoardUI Media Matrix + Curated Spotify) */}
+              {activeTab === 'media' && (
+                <div className="space-y-4">
+                  {/* Featured Spotify Strip */}
+                  <div className="p-4 rounded-2xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={avatarImg}
+                        alt="Late20s Playlist"
+                        className="w-14 h-14 rounded-xl object-cover border border-[#E0DACE] dark:border-[#3A332E]"
+                      />
+                      <div>
+                        <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-[#1DB954] font-bold mb-0.5">
+                          <span>Spotify Official Playlist</span>
+                        </div>
+                        <h3 className="text-xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB]">
+                          Late20s — Curated by Randy
+                        </h3>
+                        <p className="text-xs text-[#6E655B] dark:text-[#A39B8F]">
+                          Ambient focus, late-night coding sessions, and analog warmth.
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href="https://open.spotify.com/playlist/4RflVxxz20wZ6RKGvVItp5?si=JUVlCAjzQ6ew20AQH2H7Wg"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 rounded-xl bg-[#1DB954] text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity shrink-0"
+                    >
+                      Listen on Spotify &rarr;
+                    </a>
+                  </div>
+
+                  {/* Watch & Listen Board Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                    {filteredMedia.map((item, idx) => {
+                      const thumbnail = getMediaThumbnail(item.url, item.thumbnailUrl);
+                      return (
+                        <a
+                          key={item.id}
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE]/80 dark:border-[#332D29] hover:border-[#E84634] overflow-hidden flex flex-col justify-between transition-all shadow-2xs"
+                        >
+                          <div>
+                            {thumbnail && (
+                              <div className="w-full aspect-video bg-[#E0DACE]/30 dark:bg-[#2A2420] overflow-hidden relative">
+                                <img
+                                  src={thumbnail}
+                                  alt={item.title}
+                                  referrerPolicy="no-referrer"
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                                <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/65 text-white text-[10px] font-mono uppercase">
+                                  {String(idx + 1).padStart(2, '0')} · {item.category || 'Media'}
+                                </span>
+                              </div>
+                            )}
+                            <div className="p-3.5">
+                              <h4 className="text-sm font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors line-clamp-2 mb-1">
+                                {item.title}
+                              </h4>
+                              {item.description && (
+                                <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 leading-relaxed">
+                                  {item.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="px-3.5 pb-3 pt-1 flex items-center justify-between text-[10px] font-mono">
+                            <span className="px-2 py-0.5 rounded bg-[#E84634]/12 text-[#E84634] font-semibold">
+                              {item.platform}
+                            </span>
+                            <span className="text-[#6E655B] dark:text-[#A39B8F] flex items-center gap-1 group-hover:text-[#E84634]">
+                              Play <ExternalLink size={10} />
+                            </span>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* 4. IDENTITY & CANVAS TAB */}
+              {activeTab === 'identity' && (
+                <div className="space-y-4">
+                  <GenerativeParticleCanvas />
+                </div>
+              )}
+
+              {/* 5. IT PROJECTS TAB */}
+              {activeTab === 'projects' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    {filteredProjects.map((p) => {
+                      const isOngoing = p.status === 'in_progress';
+                      return (
+                        <div
+                          key={p.id}
+                          className="rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE]/80 dark:border-[#332D29] hover:border-[#E84634] p-4 flex flex-col justify-between transition-all shadow-2xs"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between text-[10px] font-mono mb-2">
+                              <span
+                                className={`px-2 py-0.5 rounded font-bold uppercase ${
+                                  isOngoing
+                                    ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
+                                    : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                                }`}
+                              >
+                                {isOngoing ? 'In Progress' : 'Delivered'}
+                              </span>
+                              <span className="text-[#6E655B] dark:text-[#A39B8F]">{p.timeline}</span>
+                            </div>
+
+                            <h3 className="text-base font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] mb-1.5 leading-snug">
+                              {p.title}
+                            </h3>
+                            <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 mb-3">
+                              {p.description}
+                            </p>
+                          </div>
+
+                          <div>
+                            {isOngoing && p.progressPercentage && (
+                              <div className="mb-3">
+                                <div className="flex justify-between text-[10px] font-mono text-amber-600 dark:text-amber-400 mb-1">
+                                  <span>Completion</span>
+                                  <span>{p.progressPercentage}%</span>
+                                </div>
+                                <div className="w-full h-1.5 bg-amber-500/20 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-amber-500 rounded-full"
+                                    style={{ width: `${p.progressPercentage}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex flex-wrap gap-1 pt-2 border-t border-[#E0DACE]/50 dark:border-[#2E2824]">
+                              {p.techStack.slice(0, 4).map((t) => (
+                                <span
+                                  key={t}
+                                  className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#E0DACE]/40 dark:bg-[#2A2420] text-[#4A3F35] dark:text-[#D8D0C5]"
+                                >
+                                  {t}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* 6. CREATIVE LAB TAB */}
+              {activeTab === 'tools' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Link
+                    to="/tools/dither"
+                    className="group p-6 rounded-2xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] hover:border-[#E84634] transition-all flex flex-col justify-between min-h-[220px]"
+                  >
+                    <div>
+                      <div className="w-10 h-10 rounded-xl bg-[#E84634]/12 text-[#E84634] flex items-center justify-center mb-4">
+                        <Sparkles size={20} />
+                      </div>
+                      <h3 className="text-2xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] mb-2">
+                        Lumina Dither Studio
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[#6E655B] dark:text-[#A39B8F] leading-relaxed">
+                        Interactive client-side Floyd-Steinberg, Atkinson, and Bayer matrix retro dithering laboratory for images and visual art.
+                      </p>
+                    </div>
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#E84634] mt-4 inline-flex items-center gap-1">
+                      Launch Dither Tool <ArrowUpRight size={14} />
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/tools/scratch"
+                    className="group p-6 rounded-2xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] hover:border-[#E84634] transition-all flex flex-col justify-between min-h-[220px]"
+                  >
+                    <div>
+                      <div className="w-10 h-10 rounded-xl bg-[#E84634]/12 text-[#E84634] flex items-center justify-center mb-4">
+                        <Compass size={20} />
+                      </div>
+                      <h3 className="text-2xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] mb-2">
+                        Creative Scratch Pad
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[#6E655B] dark:text-[#A39B8F] leading-relaxed">
+                        Freeform interactive canvas playground for sketching ideas, visual experiments, and tactile strokes.
+                      </p>
+                    </div>
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#E84634] mt-4 inline-flex items-center gap-1">
+                      Launch Creative Scratch <ArrowUpRight size={14} />
+                    </span>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,414 +1,1015 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Terminal as TerminalIcon, 
+  Share2, 
+  Box, 
+  RotateCcw, 
+  Play, 
+  Pause, 
+  Sparkles, 
+  Cpu, 
+  ExternalLink,
+  Maximize2,
+  Minimize2
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-type GenerativePattern = 'constellation' | 'flow' | 'lattice';
+type Mode = 'network' | 'geometry3d' | 'terminal';
 
-interface Particle {
+interface NodeItem {
+  id: string;
+  name: string;
+  category: string;
   x: number;
   y: number;
-  originX: number;
-  originY: number;
   vx: number;
   vy: number;
-  size: number;
-  alpha: number;
-  phase: number;
-  speed: number;
+  radius: number;
+  color: string;
+  description: string;
+  tech: string[];
+  metrics: string;
 }
 
-interface Ripple {
-  x: number;
-  y: number;
-  radius: number;
-  maxRadius: number;
-  alpha: number;
+interface CommandHistory {
+  command: string;
+  output: React.ReactNode;
+  timestamp: string;
 }
 
 export function GenerativeParticleCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [pattern, setPattern] = useState<GenerativePattern>('constellation');
-  const patternRef = useRef<GenerativePattern>('constellation');
+  const [mode, setMode] = useState<Mode>('network');
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [hoveredNode, setHoveredNode] = useState<NodeItem | null>(null);
+  const [geometryShape, setGeometryShape] = useState<'icosahedron' | 'cube' | 'torus'>('icosahedron');
+  const [terminalInput, setTerminalInput] = useState('');
+  const [terminalHistory, setTerminalHistory] = useState<CommandHistory[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const terminalBottomRef = useRef<HTMLDivElement>(null);
+
+  // Nodes for Network Graph mode
+  const nodesRef = useRef<NodeItem[]>([
+    {
+      id: 'core',
+      name: 'RANDY ARDIANSYAH',
+      category: 'IDENTITY',
+      x: 0.5,
+      y: 0.5,
+      vx: 0,
+      vy: 0,
+      radius: 28,
+      color: '#E84634',
+      description: 'Software Engineer & Digital Realist • Architecting modern full-stack systems and reactive web apps.',
+      tech: ['TypeScript', 'Architecture', 'System Design', 'AI Workflow'],
+      metrics: 'Status: ACTIVE • Uptime: 99.98% • Latency: 12ms'
+    },
+    {
+      id: 'frontend',
+      name: 'Frontend Systems',
+      category: 'ENGINEERING',
+      x: 0.22,
+      y: 0.28,
+      vx: 0.0003,
+      vy: -0.0002,
+      radius: 18,
+      color: '#E84634',
+      description: 'Modern reactive web interfaces with micro-interactions, canvas shaders, and editorial typography.',
+      tech: ['React 19', 'Vite', 'TailwindCSS', 'WebGL / Canvas', 'PWA'],
+      metrics: 'FPS: 60 • Bundle: Optimized • Hydration: Instant'
+    },
+    {
+      id: 'backend',
+      name: 'Distributed Backend',
+      category: 'SERVICES',
+      x: 0.78,
+      y: 0.26,
+      vx: -0.0002,
+      vy: 0.0003,
+      radius: 20,
+      color: '#E84634',
+      description: 'High-throughput microservices, real-time WebSockets, REST/GraphQL APIs, and resilient data layers.',
+      tech: ['Node.js', 'Go', 'Express', 'Cloud Functions', 'REST / GraphQL'],
+      metrics: 'Throughput: 12k req/s • Zero-Downtime • Graceful Fallback'
+    },
+    {
+      id: 'cloud',
+      name: 'Cloud & Database',
+      category: 'INFRASTRUCTURE',
+      x: 0.8,
+      y: 0.72,
+      vx: -0.0002,
+      vy: -0.0002,
+      radius: 17,
+      color: '#E84634',
+      description: 'Relational & NoSQL database modeling, Firestore synchronization, multi-region container orchestration.',
+      tech: ['Firestore', 'PostgreSQL', 'GCP', 'Docker', 'Redis Cache'],
+      metrics: 'Replication: Multi-Region • Durability: 99.999%'
+    },
+    {
+      id: 'ai',
+      name: 'AI & Intelligence',
+      category: 'INNOVATION',
+      x: 0.22,
+      y: 0.74,
+      vx: 0.0003,
+      vy: 0.0002,
+      radius: 19,
+      color: '#E84634',
+      description: 'Vibe coding acceleration, Gemini API orchestration, agentic pipelines, and neural text/vision integration.',
+      tech: ['Gemini 2.5', 'LLM Agents', 'Vector Search', 'Prompt Engineering'],
+      metrics: 'Tokens: Streaming • Context: 1M • Zero Hallucination Guard'
+    },
+    {
+      id: 'philosophy',
+      name: 'The Late 20s',
+      category: 'PHILOSOPHY',
+      x: 0.5,
+      y: 0.82,
+      vx: 0.0001,
+      vy: -0.0001,
+      radius: 16,
+      color: '#E84634',
+      description: 'Embracing discomfort, deep focus over superficial hype, crafting timeless and reliable software artifacts.',
+      tech: ['Discipline', 'Continuous Learning', 'Digital Realism', 'Craft'],
+      metrics: 'Mindset: Grounded • Focus: High Impact'
+    }
+  ]);
+
+  const draggedNodeRef = useRef<NodeItem | null>(null);
+
+  // Initialize terminal welcome output
+  useEffect(() => {
+    setTerminalHistory([
+      {
+        command: 'system:init --target=late20s-workspace',
+        timestamp: '10:00:01',
+        output: (
+          <div className="space-y-1 text-xs">
+            <pre className="font-mono text-[#E84634] leading-tight select-none">
+{`  ____                 _         ___     _ _ _       _ 
+ |  _ \\ __ _ _ __   __| |_   _  |_ _|___| (_) |_   _(_)
+ | |_) / _\` | '_ \\ / _\` | | | |  | |/ __| | | __| | | |
+ |  _ < (_| | | | | (_| | |_| |  | | (__| | | |_| |_| |
+ |_| \\_\\__,_|_| |_|\\__,_|\\__, | |___\\___|_|_|\\__|\\__,_|
+                         |___/                         `}
+            </pre>
+            <p className="text-[#E84634]/90 font-mono font-semibold pt-1">
+              [OK] Identity Matrix &amp; Systems Console Initialized.
+            </p>
+            <p className="text-[#E84634]/70 font-mono text-[11px]">
+              Engine: Randy Ardiansyah • Digital Realist • Status: READY
+            </p>
+            <p className="text-[#E84634]/70 font-mono text-[11px]">
+              Type <span className="text-[#E84634] font-bold underline">help</span> or click quick commands below to explore.
+            </p>
+          </div>
+        )
+      }
+    ]);
+  }, []);
 
   useEffect(() => {
-    patternRef.current = pattern;
-  }, [pattern]);
+    if (terminalBottomRef.current) {
+      terminalBottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [terminalHistory]);
 
+  // Canvas render loop for Network & 3D Geometry
   useEffect(() => {
+    if (mode === 'terminal') return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationFrameId: number;
-    let width = 0;
-    let height = 0;
-    let particles: Particle[] = [];
-    let ripples: Ripple[] = [];
-    let time = 0;
+    let animationId: number;
+    let rotationX = 0.4;
+    let rotationY = 0.6;
+    const rotationSpeed = 0.008;
+    let pulseAngle = 0;
 
-    const mouse = {
-      x: -9999,
-      y: -9999,
-      targetX: -9999,
-      targetY: -9999,
-      vx: 0,
-      vy: 0,
-      isActive: false,
-    };
-
-    const initParticles = (w: number, h: number) => {
-      const area = w * h;
-      const count = Math.min(180, Math.max(75, Math.floor(area / 4800)));
-      const nextParticles: Particle[] = [];
-
-      const cols = Math.ceil(Math.sqrt(count * (w / Math.max(h, 1))));
-      const rows = Math.ceil(count / cols);
-      const cellW = w / cols;
-      const cellH = h / rows;
-
-      for (let i = 0; i < count; i++) {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        const originX = (col + 0.5) * cellW;
-        const originY = (row + 0.5) * cellH;
-        const x = originX + (Math.random() - 0.5) * cellW * 0.8;
-        const y = originY + (Math.random() - 0.5) * cellH * 0.8;
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 0.25 + Math.random() * 0.55;
-
-        nextParticles.push({
-          x,
-          y,
-          originX,
-          originY,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          size: 1.4 + Math.random() * 2.2,
-          alpha: 0.35 + Math.random() * 0.55,
-          phase: Math.random() * Math.PI * 2,
-          speed,
-        });
-      }
-
-      particles = nextParticles;
-    };
-
-    const handleResize = () => {
+    const resizeCanvas = () => {
       const parent = canvas.parentElement;
       if (!parent) return;
       const rect = parent.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = rect.width;
-      height = rect.height;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      initParticles(width, height);
     };
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
-    const onPointerMove = (e: PointerEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const nextX = e.clientX - rect.left;
-      const nextY = e.clientY - rect.top;
-      if (mouse.isActive) {
-        mouse.vx = nextX - mouse.targetX;
-        mouse.vy = nextY - mouse.targetY;
-      }
-      mouse.targetX = nextX;
-      mouse.targetY = nextY;
-      mouse.isActive = true;
-    };
-
-    const onPointerLeave = () => {
-      mouse.isActive = false;
-    };
-
-    const onPointerDown = (e: PointerEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const clickY = e.clientY - rect.top;
-
-      ripples.push({
-        x: clickX,
-        y: clickY,
-        radius: 4,
-        maxRadius: Math.max(width, height) * 0.45,
-        alpha: 0.65,
-      });
-
-      particles.forEach((p) => {
-        const dx = p.x - clickX;
-        const dy = p.y - clickY;
-        const dist = Math.hypot(dx, dy);
-        if (dist < 220 && dist > 0.001) {
-          const force = ((220 - dist) / 220) * 4.2;
-          p.vx += (dx / dist) * force;
-          p.vy += (dy / dist) * force;
+    // 3D Geometry definitions
+    const getGeometryVertices = () => {
+      if (geometryShape === 'cube') {
+        const s = 100;
+        return [
+          [-s, -s, -s], [s, -s, -s], [s, s, -s], [-s, s, -s],
+          [-s, -s, s], [s, -s, s], [s, s, s], [-s, s, s]
+        ];
+      } else if (geometryShape === 'torus') {
+        const verts: [number, number, number][] = [];
+        const R = 110;
+        const r = 40;
+        const segs = 16;
+        for (let i = 0; i < segs; i++) {
+          const u = (i / segs) * Math.PI * 2;
+          for (let j = 0; j < 8; j++) {
+            const v = (j / 8) * Math.PI * 2;
+            const x = (R + r * Math.cos(v)) * Math.cos(u);
+            const y = (R + r * Math.cos(v)) * Math.sin(u);
+            const z = r * Math.sin(v);
+            verts.push([x, y, z]);
+          }
         }
-      });
-    };
-
-    canvas.addEventListener('pointermove', onPointerMove);
-    canvas.addEventListener('pointerleave', onPointerLeave);
-    canvas.addEventListener('pointerdown', onPointerDown);
-
-    // Smooth pseudo-noise flow angle
-    const getFlowAngle = (x: number, y: number, t: number) => {
-      const scale = 0.0045;
-      return (
-        Math.sin(x * scale + t * 0.7) * Math.cos(y * scale - t * 0.5) * Math.PI * 2 +
-        Math.cos((x + y) * scale * 0.6 + t * 0.4) * Math.PI
-      );
-    };
-
-    const render = () => {
-      time += 0.012;
-      const currentPattern = patternRef.current;
-      const isDark = document.documentElement.classList.contains('dark');
-
-      // Smooth cursor interpolation
-      if (mouse.isActive) {
-        mouse.x += (mouse.targetX - mouse.x) * 0.18;
-        mouse.y += (mouse.targetY - mouse.y) * 0.18;
+        return verts;
       } else {
-        mouse.x += (-9999 - mouse.x) * 0.05;
-        mouse.y += (-9999 - mouse.y) * 0.05;
+        // Icosahedron
+        const phi = (1 + Math.sqrt(5)) / 2;
+        const scale = 75;
+        const raw = [
+          [-1,  phi, 0], [ 1,  phi, 0], [-1, -phi, 0], [ 1, -phi, 0],
+          [0, -1,  phi], [0,  1,  phi], [0, -1, -phi], [0,  1, -phi],
+          [ phi, 0, -1], [ phi, 0,  1], [-phi, 0, -1], [-phi, 0,  1]
+        ];
+        return raw.map(([x, y, z]) => [x * scale, y * scale, z * scale] as [number, number, number]);
       }
-      mouse.vx *= 0.9;
-      mouse.vy *= 0.9;
+    };
 
-      ctx.clearRect(0, 0, width, height);
-
-      // Subtle architectural background grid dots
-      ctx.fillStyle = isDark ? 'rgba(232, 70, 52, 0.08)' : 'rgba(232, 70, 52, 0.1)';
-      const gridStep = 44;
-      for (let gx = gridStep / 2; gx < width; gx += gridStep) {
-        for (let gy = gridStep / 2; gy < height; gy += gridStep) {
-          ctx.fillRect(gx, gy, 1, 1);
-        }
-      }
-
-      // Draw & update click ripples
-      for (let i = ripples.length - 1; i >= 0; i--) {
-        const r = ripples[i];
-        r.radius += 4.5;
-        r.alpha *= 0.96;
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(232, 70, 52, ${r.alpha})`;
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
-        ctx.restore();
-
-        if (r.radius >= r.maxRadius || r.alpha < 0.02) {
-          ripples.splice(i, 1);
-        }
-      }
-
-      // Update particle kinematics
-      const interactionRadius = Math.min(width, height) * 0.34;
-
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-
-        if (currentPattern === 'constellation') {
-          // Gentle organic drift
-          p.vx += Math.cos(time + p.phase) * 0.008;
-          p.vy += Math.sin(time + p.phase) * 0.008;
-
-          // Clamp velocity
-          const speed = Math.hypot(p.vx, p.vy);
-          const maxSpeed = p.speed * 1.8;
-          if (speed > maxSpeed) {
-            p.vx = (p.vx / speed) * maxSpeed;
-            p.vy = (p.vy / speed) * maxSpeed;
-          }
-        } else if (currentPattern === 'flow') {
-          // Vector flow field currents
-          const angle = getFlowAngle(p.x, p.y, time);
-          p.vx += Math.cos(angle) * 0.08;
-          p.vy += Math.sin(angle) * 0.08;
-          p.vx *= 0.92;
-          p.vy *= 0.92;
-        } else if (currentPattern === 'lattice') {
-          // Harmonic spring return to architectural grid + wave modulation
-          const waveX = Math.sin(time * 1.8 + p.originY * 0.02) * 14;
-          const waveY = Math.cos(time * 1.8 + p.originX * 0.02) * 14;
-          const targetX = p.originX + waveX;
-          const targetY = p.originY + waveY;
-          p.vx += (targetX - p.x) * 0.045;
-          p.vy += (targetY - p.y) * 0.045;
-          p.vx *= 0.84;
-          p.vy *= 0.84;
-        }
-
-        // Cursor field reactivity (swirl + magnetic deflection)
-        if (mouse.isActive) {
-          const dx = p.x - mouse.x;
-          const dy = p.y - mouse.y;
-          const dist = Math.hypot(dx, dy);
-
-          if (dist < interactionRadius && dist > 0.001) {
-            const norm = 1 - dist / interactionRadius;
-            const nx = dx / dist;
-            const ny = dy / dist;
-
-            // Tangential orbital swirl + gentle repulsion core
-            const swirlStrength = norm * 0.42;
-            const repelStrength = dist < interactionRadius * 0.45 ? norm * 0.65 : -norm * 0.15;
-
-            p.vx += nx * repelStrength - ny * swirlStrength + mouse.vx * norm * 0.015;
-            p.vy += ny * repelStrength + nx * swirlStrength + mouse.vy * norm * 0.015;
+    const getGeometryEdges = () => {
+      if (geometryShape === 'cube') {
+        return [
+          [0, 1], [1, 2], [2, 3], [3, 0],
+          [4, 5], [5, 6], [6, 7], [7, 4],
+          [0, 4], [1, 5], [2, 6], [3, 7]
+        ];
+      } else if (geometryShape === 'torus') {
+        const edges: [number, number][] = [];
+        const segs = 16;
+        for (let i = 0; i < segs; i++) {
+          for (let j = 0; j < 8; j++) {
+            const idx = i * 8 + j;
+            const nextRing = ((i + 1) % segs) * 8 + j;
+            const nextTube = i * 8 + ((j + 1) % 8);
+            edges.push([idx, nextRing]);
+            edges.push([idx, nextTube]);
           }
         }
-
-        p.x += p.vx;
-        p.y += p.vy;
-
-        // Toroidal wrap for constellation and flow modes
-        if (currentPattern !== 'lattice') {
-          const margin = 20;
-          if (p.x < -margin) p.x = width + margin;
-          if (p.x > width + margin) p.x = -margin;
-          if (p.y < -margin) p.y = height + margin;
-          if (p.y > height + margin) p.y = -margin;
-        }
+        return edges;
+      } else {
+        // Icosahedron edges
+        return [
+          [0, 11], [0, 5], [0, 1], [0, 7], [0, 10],
+          [1, 5], [5, 11], [11, 10], [10, 7], [7, 1],
+          [3, 9], [3, 4], [3, 2], [3, 6], [3, 8],
+          [4, 9], [9, 8], [8, 6], [6, 2], [2, 4],
+          [4, 5], [5, 9], [9, 1], [1, 8], [8, 7],
+          [7, 6], [6, 10], [10, 2], [2, 11], [11, 4]
+        ];
       }
+    };
 
-      // Draw connections between nearby particles
-      const connectionDist = currentPattern === 'flow' ? 78 : 115;
+    // Render Frame Loop
+    const render = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      const w = canvas.parentElement?.clientWidth || 800;
+      const h = canvas.parentElement?.clientHeight || 450;
 
+      ctx.clearRect(0, 0, w, h);
+
+      // Subtle dynamic grid / ambient radar background
+      ctx.save();
+      ctx.strokeStyle = isDark ? 'rgba(232, 70, 52, 0.05)' : 'rgba(232, 70, 52, 0.07)';
       ctx.lineWidth = 1;
-      for (let i = 0; i < particles.length; i++) {
-        const p1 = particles[i];
-
-        // Connect to cursor if within range
-        if (mouse.isActive) {
-          const mdx = p1.x - mouse.x;
-          const mdy = p1.y - mouse.y;
-          const mDist = Math.hypot(mdx, mdy);
-          if (mDist < interactionRadius * 0.85) {
-            const mAlpha = (1 - mDist / (interactionRadius * 0.85)) * 0.45;
-            ctx.strokeStyle = `rgba(232, 70, 52, ${mAlpha})`;
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(mouse.x, mouse.y);
-            ctx.stroke();
-          }
-        }
-
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p1.x - p2.x;
-          const dy = p1.y - p2.y;
-          if (Math.abs(dx) > connectionDist || Math.abs(dy) > connectionDist) continue;
-
-          const dist = Math.hypot(dx, dy);
-          if (dist < connectionDist) {
-            const lineAlpha = (1 - dist / connectionDist) * (isDark ? 0.28 : 0.32);
-            ctx.strokeStyle = `rgba(232, 70, 52, ${lineAlpha})`;
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Draw particles and velocity vectors
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-
-        let proximityBoost = 0;
-        if (mouse.isActive) {
-          const d = Math.hypot(p.x - mouse.x, p.y - mouse.y);
-          if (d < interactionRadius) {
-            proximityBoost = (1 - d / interactionRadius) * 0.55;
-          }
-        }
-
-        const finalAlpha = Math.min(1, p.alpha + proximityBoost);
-        const radius = p.size + proximityBoost * 1.8;
-
-        if (currentPattern === 'flow') {
-          // Draw short directional vector tail in flow mode
-          ctx.strokeStyle = `rgba(232, 70, 52, ${finalAlpha * 0.55})`;
-          ctx.lineWidth = 1.4;
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p.x - p.vx * 6, p.y - p.vy * 6);
-          ctx.stroke();
-        }
-
-        ctx.fillStyle = `rgba(232, 70, 52, ${finalAlpha})`;
+      const gridSize = 40;
+      for (let x = 0; x < w; x += gridSize) {
         ctx.beginPath();
-        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Subtle cursor focal ring
-      if (mouse.isActive) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 18, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(232, 70, 52, 0.35)';
-        ctx.lineWidth = 1;
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
         ctx.stroke();
-
+      }
+      for (let y = 0; y < h; y += gridSize) {
         ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 3, 0, Math.PI * 2);
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // Draw subtle dynamic coordinates around canvas corners
+      ctx.fillStyle = isDark ? 'rgba(232, 70, 52, 0.3)' : 'rgba(232, 70, 52, 0.35)';
+      ctx.font = '10px monospace';
+      ctx.fillText(`SYS: RANDY-IDENTITY // MODE: ${mode.toUpperCase()}`, 16, 24);
+      ctx.fillText(`POS: ${Math.round(mousePos.x)}, ${Math.round(mousePos.y)}`, w - 110, 24);
+      ctx.restore();
+
+      if (mode === 'network') {
+        const nodes = nodesRef.current;
+        pulseAngle += 0.03;
+
+        // Physics step
+        if (isPlaying) {
+          nodes.forEach((node) => {
+            if (draggedNodeRef.current?.id === node.id) return;
+            node.x += node.vx;
+            node.y += node.vy;
+
+            // Soft wall bounces
+            if (node.x < 0.12 || node.x > 0.88) node.vx *= -1;
+            if (node.y < 0.16 || node.y > 0.84) node.vy *= -1;
+
+            // Gravitational pull toward center
+            const dx = 0.5 - node.x;
+            const dy = 0.5 - node.y;
+            if (node.id !== 'core') {
+              node.vx += dx * 0.00004;
+              node.vy += dy * 0.00004;
+            }
+
+            // Mouse interaction / deflection
+            const mouseCanvasX = mousePos.x;
+            const mouseCanvasY = mousePos.y;
+            const nodePxX = node.x * w;
+            const nodePxY = node.y * h;
+            const distMouse = Math.hypot(nodePxX - mouseCanvasX, nodePxY - mouseCanvasY);
+            if (distMouse < 100 && distMouse > 1) {
+              const repelAngle = Math.atan2(nodePxY - mouseCanvasY, nodePxX - mouseCanvasX);
+              const force = ((100 - distMouse) / 100) * 0.0008;
+              node.vx += Math.cos(repelAngle) * force;
+              node.vy += Math.sin(repelAngle) * force;
+            }
+
+            // Damping
+            node.vx *= 0.99;
+            node.vy *= 0.99;
+          });
+        }
+
+        // Draw connections between nodes
+        const coreNode = nodes.find(n => n.id === 'core') || nodes[0];
+        const corePxX = coreNode.x * w;
+        const corePxY = coreNode.y * h;
+
+        nodes.forEach(node => {
+          if (node.id === 'core') return;
+          const pxX = node.x * w;
+          const pxY = node.y * h;
+
+          const isConnectedHovered = hoveredNode?.id === node.id || hoveredNode?.id === 'core';
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(corePxX, corePxY);
+          ctx.lineTo(pxX, pxY);
+
+          if (isConnectedHovered) {
+            ctx.strokeStyle = '#E84634';
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = '#E84634';
+            ctx.shadowBlur = 8;
+          } else {
+            ctx.strokeStyle = isDark ? 'rgba(232, 70, 52, 0.22)' : 'rgba(232, 70, 52, 0.28)';
+            ctx.lineWidth = 1.2;
+            ctx.setLineDash([4, 4]);
+          }
+          ctx.stroke();
+          ctx.restore();
+
+          // Data flow pulses along edges
+          const pulseOffset = (pulseAngle * 0.5 + node.radius) % 1;
+          const pulseX = corePxX + (pxX - corePxX) * pulseOffset;
+          const pulseY = corePxY + (pxY - corePxY) * pulseOffset;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(pulseX, pulseY, 3, 0, Math.PI * 2);
+          ctx.fillStyle = '#E84634';
+          ctx.shadowColor = '#E84634';
+          ctx.shadowBlur = 6;
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // Additional perimeter linkages
+        for (let i = 1; i < nodes.length; i++) {
+          const next = (i % (nodes.length - 1)) + 1;
+          const n1 = nodes[i];
+          const n2 = nodes[next];
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(n1.x * w, n1.y * h);
+          ctx.lineTo(n2.x * w, n2.y * h);
+          ctx.strokeStyle = isDark ? 'rgba(232, 70, 52, 0.12)' : 'rgba(232, 70, 52, 0.16)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Draw nodes
+        nodes.forEach(node => {
+          const pxX = node.x * w;
+          const pxY = node.y * h;
+          const isCore = node.id === 'core';
+          const isHovered = hoveredNode?.id === node.id;
+
+          ctx.save();
+
+          // Outer halo / pulse
+          if (isCore || isHovered) {
+            const pulseScale = 1 + Math.sin(pulseAngle * 2) * 0.12;
+            ctx.beginPath();
+            ctx.arc(pxX, pxY, (node.radius + 10) * pulseScale, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(232, 70, 52, 0.12)';
+            ctx.fill();
+          }
+
+          // Node body
+          ctx.beginPath();
+          ctx.arc(pxX, pxY, node.radius, 0, Math.PI * 2);
+          ctx.fillStyle = isCore 
+            ? '#E84634' 
+            : isDark ? '#2C241B' : '#FDFBF7';
+          ctx.fill();
+
+          ctx.lineWidth = isCore ? 3 : 2;
+          ctx.strokeStyle = '#E84634';
+          if (isHovered) {
+            ctx.shadowColor = '#E84634';
+            ctx.shadowBlur = 12;
+          }
+          ctx.stroke();
+
+          // Node inner icon/symbol
+          ctx.fillStyle = isCore ? '#FFFFFF' : '#E84634';
+          ctx.font = isCore ? 'bold 12px monospace' : '10px monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(isCore ? 'R' : node.name.charAt(0), pxX, pxY);
+
+          // Node label under node
+          ctx.fillStyle = '#E84634';
+          ctx.font = isCore ? 'bold 12px sans-serif' : '11px monospace';
+          ctx.fillText(node.name, pxX, pxY + node.radius + 15);
+
+          if (isCore) {
+            ctx.font = '9px monospace';
+            ctx.fillStyle = isDark ? 'rgba(232, 70, 52, 0.7)' : 'rgba(232, 70, 52, 0.8)';
+            ctx.fillText('PORTFOLIO NUCLEUS', pxX, pxY + node.radius + 27);
+          }
+
+          ctx.restore();
+        });
+      } else if (mode === 'geometry3d') {
+        // 3D Geometry Mode
+        if (isPlaying) {
+          rotationX += rotationSpeed * 0.7;
+          rotationY += rotationSpeed;
+        }
+
+        const vertices = getGeometryVertices();
+        const edges = getGeometryEdges();
+        const cx = w / 2;
+        const cy = h / 2;
+        const fov = 350;
+
+        // Rotate and project vertices
+        const projected = vertices.map(([vx, vy, vz]) => {
+          // Rotate around X
+          const y1 = vy * Math.cos(rotationX) - vz * Math.sin(rotationX);
+          const z1 = vy * Math.sin(rotationX) + vz * Math.cos(rotationX);
+
+          // Rotate around Y
+          const x2 = vx * Math.cos(rotationY) + z1 * Math.sin(rotationY);
+          const z2 = -vx * Math.sin(rotationY) + z1 * Math.cos(rotationY);
+
+          // Perspective projection
+          const distance = 400;
+          const factor = fov / (distance + z2);
+          const xProj = x2 * factor + cx;
+          const yProj = y1 * factor + cy;
+
+          return { x: xProj, y: yProj, z: z2 };
+        });
+
+        // Draw edges
+        edges.forEach(([i, j]) => {
+          const p1 = projected[i];
+          const p2 = projected[j];
+          if (!p1 || !p2) return;
+
+          const avgZ = (p1.z + p2.z) / 2;
+          const alpha = Math.max(0.15, Math.min(0.9, (avgZ + 120) / 240));
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = `rgba(232, 70, 52, ${alpha})`;
+          ctx.lineWidth = avgZ > 0 ? 2 : 1;
+          if (avgZ > 30) {
+            ctx.shadowColor = '#E84634';
+            ctx.shadowBlur = 6;
+          }
+          ctx.stroke();
+          ctx.restore();
+        });
+
+        // Draw projected vertex dots
+        projected.forEach(p => {
+          const radius = Math.max(2, Math.min(5, (p.z + 120) / 45));
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = '#E84634';
+          ctx.shadowColor = '#E84634';
+          ctx.shadowBlur = 5;
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // Center Brand Identity Badge inside 3D Shape
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
         ctx.fillStyle = '#E84634';
-        ctx.fill();
+        ctx.font = 'bold 22px "Instrument Serif", Georgia, serif';
+        ctx.fillText('RANDY ARDIANSYAH', cx, cy - 10);
+
+        ctx.font = 'bold 10px monospace';
+        ctx.fillStyle = isDark ? 'rgba(232, 70, 52, 0.9)' : 'rgba(232, 70, 52, 0.85)';
+        ctx.fillText('THE LATE 20S • DIGITAL REALIST', cx, cy + 12);
+
+        ctx.font = '9px monospace';
+        ctx.fillText('ENGINEERING & HIGH-IMPACT SYSTEMS', cx, cy + 28);
         ctx.restore();
       }
 
-      animationFrameId = requestAnimationFrame(render);
+      animationId = requestAnimationFrame(render);
     };
 
     render();
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', handleResize);
-      canvas.removeEventListener('pointermove', onPointerMove);
-      canvas.removeEventListener('pointerleave', onPointerLeave);
-      canvas.removeEventListener('pointerdown', onPointerDown);
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', resizeCanvas);
     };
-  }, []);
+  }, [mode, isPlaying, geometryShape, mousePos, hoveredNode]);
+
+  // Handle canvas mouse move for interactive graph
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setMousePos({ x, y });
+
+    if (draggedNodeRef.current) {
+      draggedNodeRef.current.x = Math.max(0.08, Math.min(0.92, x / rect.width));
+      draggedNodeRef.current.y = Math.max(0.12, Math.min(0.88, y / rect.height));
+      return;
+    }
+
+    if (mode === 'network') {
+      const found = nodesRef.current.find(n => {
+        const nx = n.x * rect.width;
+        const ny = n.y * rect.height;
+        return Math.hypot(nx - x, ny - y) <= n.radius + 8;
+      });
+      setHoveredNode(found || null);
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (mode !== 'network') return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const clicked = nodesRef.current.find(n => {
+      const nx = n.x * rect.width;
+      const ny = n.y * rect.height;
+      return Math.hypot(nx - x, ny - y) <= n.radius + 10;
+    });
+
+    if (clicked) {
+      draggedNodeRef.current = clicked;
+    }
+  };
+
+  const handleMouseUp = () => {
+    draggedNodeRef.current = null;
+  };
+
+  // Reset node positions
+  const handleResetPositions = () => {
+    nodesRef.current[0].x = 0.5; nodesRef.current[0].y = 0.5;
+    nodesRef.current[1].x = 0.22; nodesRef.current[1].y = 0.28;
+    nodesRef.current[2].x = 0.78; nodesRef.current[2].y = 0.26;
+    nodesRef.current[3].x = 0.8; nodesRef.current[3].y = 0.72;
+    nodesRef.current[4].x = 0.22; nodesRef.current[4].y = 0.74;
+    nodesRef.current[5].x = 0.5; nodesRef.current[5].y = 0.82;
+    nodesRef.current.forEach(n => { n.vx = (Math.random() - 0.5) * 0.0004; n.vy = (Math.random() - 0.5) * 0.0004; });
+  };
+
+  // Terminal command executor
+  const handleCommandSubmit = (cmdToRun?: string) => {
+    const rawCmd = (cmdToRun !== undefined ? cmdToRun : terminalInput).trim();
+    if (!rawCmd) return;
+
+    const cmdLower = rawCmd.toLowerCase();
+    const now = new Date().toTimeString().split(' ')[0];
+    let outputContent: React.ReactNode = null;
+
+    if (cmdLower === 'help') {
+      outputContent = (
+        <div className="space-y-1 font-mono text-xs">
+          <p className="text-[#E84634] font-bold">Available Commands:</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 text-[11px] text-[#E84634]/90 pt-1">
+            <span>• <strong className="text-[#E84634]">whoami</strong> : Bio summary</span>
+            <span>• <strong className="text-[#E84634]">skills</strong> : Technical stack</span>
+            <span>• <strong className="text-[#E84634]">projects</strong> : IT project status</span>
+            <span>• <strong className="text-[#E84634]">architecture</strong> : System design</span>
+            <span>• <strong className="text-[#E84634]">stats</strong> : Live metrics</span>
+            <span>• <strong className="text-[#E84634]">clear</strong> : Clear screen</span>
+          </div>
+        </div>
+      );
+    } else if (cmdLower === 'whoami') {
+      outputContent = (
+        <div className="space-y-1.5 font-mono text-xs text-[#E84634]/90">
+          <p className="font-bold text-[#E84634]">RANDY ARDIANSYAH</p>
+          <p>Role: Software Engineer &amp; Digital Realist</p>
+          <p>Focus: Full-Stack Architectures, Distributed APIs, AI Integration &amp; Vibe Coding.</p>
+          <p className="italic text-[#E84634]/70">"Diving deeper into the process, embracing the discomfort, and bending fate to create meaningful digital systems."</p>
+        </div>
+      );
+    } else if (cmdLower === 'skills') {
+      outputContent = (
+        <div className="space-y-1 font-mono text-xs text-[#E84634]">
+          <p className="font-bold">Core Engineering Capabilities:</p>
+          <div className="space-y-1 text-[11px] text-[#E84634]/85 pt-1">
+            <div className="flex justify-between"><span>[Frontend] React 19, TypeScript, Next.js, WebGL</span><span>95%</span></div>
+            <div className="w-full bg-[#E84634]/20 h-1.5 rounded-full"><div className="bg-[#E84634] h-1.5 rounded-full w-[95%]"></div></div>
+            
+            <div className="flex justify-between pt-1"><span>[Backend] Node.js, Express, Go, REST/GraphQL</span><span>92%</span></div>
+            <div className="w-full bg-[#E84634]/20 h-1.5 rounded-full"><div className="bg-[#E84634] h-1.5 rounded-full w-[92%]"></div></div>
+
+            <div className="flex justify-between pt-1"><span>[Databases &amp; Cloud] Firestore, PostgreSQL, Docker, GCP</span><span>88%</span></div>
+            <div className="w-full bg-[#E84634]/20 h-1.5 rounded-full"><div className="bg-[#E84634] h-1.5 rounded-full w-[88%]"></div></div>
+
+            <div className="flex justify-between pt-1"><span>[AI &amp; Automation] Gemini 2.5, Agents, RAG Pipelines</span><span>90%</span></div>
+            <div className="w-full bg-[#E84634]/20 h-1.5 rounded-full"><div className="bg-[#E84634] h-1.5 rounded-full w-[90%]"></div></div>
+          </div>
+        </div>
+      );
+    } else if (cmdLower === 'projects') {
+      outputContent = (
+        <div className="space-y-1.5 font-mono text-xs text-[#E84634]">
+          <p className="font-bold">Active &amp; Completed IT Initiatives:</p>
+          <div className="space-y-1 text-[11px] text-[#E84634]/85">
+            <div className="p-1.5 border border-[#E84634]/30 rounded bg-[#E84634]/5">
+              <span className="text-amber-500 font-bold">[IN PROGRESS]</span> <strong>Distributed Real-Time Fleet Telemetry</strong> (Go, WebSockets, TimescaleDB)
+            </div>
+            <div className="p-1.5 border border-[#E84634]/30 rounded bg-[#E84634]/5">
+              <span className="text-amber-500 font-bold">[IN PROGRESS]</span> <strong>Intelligent Code Refactoring Assistant</strong> (Gemini 2.5, AST, TypeScript)
+            </div>
+            <div className="p-1.5 border border-[#E84634]/30 rounded bg-[#E84634]/5">
+              <span className="text-emerald-500 font-bold">[DELIVERED]</span> <strong>Enterprise Micro-Frontend Architecture</strong> (Module Federation, React 19)
+            </div>
+            <div className="pt-1">
+              <Link to="/projects" className="underline font-bold hover:text-white">
+                → Open Full Projects Catalog Page (/projects)
+              </Link>
+            </div>
+          </div>
+        </div>
+      );
+    } else if (cmdLower === 'stats' || cmdLower === 'status') {
+      outputContent = (
+        <div className="font-mono text-xs text-[#E84634] space-y-1">
+          <p className="font-bold">System Diagnostics:</p>
+          <p className="text-[11px]">• Environment: Production (Web SPA + Firebase Firestore)</p>
+          <p className="text-[11px]">• Client Latency: 14ms • Location: Jakarta / Asia-East1</p>
+          <p className="text-[11px]">• Frame Rate: 60 FPS • Canvas Engine: Responsive 2D / 3D</p>
+          <p className="text-[11px]">• Node Count: {nodesRef.current.length} Active System Nodes</p>
+        </div>
+      );
+    } else if (cmdLower === 'architecture') {
+      outputContent = (
+        <div className="font-mono text-xs text-[#E84634] space-y-1">
+          <p className="font-bold">System Architectural Blueprint:</p>
+          <pre className="text-[10px] text-[#E84634]/80 leading-snug">
+{`[Client / PWA UI] ---> [Vite + React 19 SSR/SPA Engine]
+       |
+       +---> [Firebase Auth + Security Rules v2]
+       +---> [Cloud Firestore Global DB]
+       +---> [Edge Analytics & Gemini API Worker]`}
+          </pre>
+        </div>
+      );
+    } else if (cmdLower === 'clear') {
+      setTerminalHistory([]);
+      setTerminalInput('');
+      return;
+    } else {
+      outputContent = (
+        <p className="font-mono text-xs text-red-500">
+          Command not recognized: "{rawCmd}". Type <span className="underline font-bold text-[#E84634]">help</span> for valid commands.
+        </p>
+      );
+    }
+
+    setTerminalHistory(prev => [
+      ...prev,
+      {
+        command: rawCmd,
+        output: outputContent,
+        timestamp: now
+      }
+    ]);
+
+    setTerminalInput('');
+  };
 
   return (
-    <div className="w-full aspect-[4/3] sm:aspect-[21/9] rounded-[2rem] overflow-hidden relative shadow-xl border border-[#E0DACE]/80 dark:border-[#3A332E]/80 bg-[#FDFBF7] dark:bg-[#1E1A18] group select-none">
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full block cursor-crosshair touch-none"
-        aria-label="Interactive generative particle system representing interconnected software systems and creative engineering"
-      />
+    <div 
+      ref={containerRef}
+      className={`w-full rounded-[2rem] overflow-hidden relative shadow-2xl border border-[#E0DACE] dark:border-[#3A332E] bg-[#FDFBF7] dark:bg-[#1E1A18] transition-all duration-300 flex flex-col ${
+        isExpanded ? 'aspect-auto min-h-[580px]' : 'aspect-[4/3] sm:aspect-video'
+      }`}
+    >
+      {/* Interactive Top Chrome Bar */}
+      <div className="h-12 border-b border-[#E0DACE] dark:border-[#3A332E] bg-white/70 dark:bg-[#25201D]/80 backdrop-blur-md px-4 flex items-center justify-between z-20 shrink-0">
+        
+        {/* Left: Window Dots & Identity Breadcrumb */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]/40 inline-block"></span>
+            <span className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]/40 inline-block"></span>
+            <span className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/40 inline-block"></span>
+          </div>
 
-      {/* Minimalist Pattern Controls */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 sm:left-6 sm:translate-x-0 flex items-center gap-1 p-1 rounded-full bg-[#FDFBF7]/85 dark:bg-[#1E1A18]/85 backdrop-blur-md border border-[#E0DACE] dark:border-[#3A332E] shadow-sm">
-        {(['constellation', 'flow', 'lattice'] as GenerativePattern[]).map((mode) => (
+          <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-[#E0DACE] dark:border-[#3A332E] text-xs font-mono font-bold text-[#E84634]">
+            <Cpu size={14} className="animate-spin text-[#E84634]" style={{ animationDuration: '8s' }} />
+            <span>randy@identity-engine</span>
+          </div>
+        </div>
+
+        {/* Center: Mode Selectors */}
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-[#E0DACE]/40 dark:bg-[#141211]/60 border border-[#E0DACE]/60 dark:border-[#3A332E]">
           <button
-            key={mode}
             type="button"
-            onClick={() => setPattern(mode)}
-            className={`px-3.5 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider transition-all ${
-              pattern === mode
-                ? 'bg-[#E84634] text-white font-semibold'
-                : 'text-[#E84634]/75 hover:text-[#E84634]'
+            onClick={() => setMode('network')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
+              mode === 'network'
+                ? 'bg-[#E84634] text-white shadow-sm'
+                : 'text-[#E84634]/70 hover:text-[#E84634] hover:bg-[#E84634]/10'
             }`}
+            title="Interactive Network Graph"
           >
-            {mode}
+            <Share2 size={13} />
+            <span className="hidden md:inline">Graph</span>
           </button>
-        ))}
+
+          <button
+            type="button"
+            onClick={() => setMode('geometry3d')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
+              mode === 'geometry3d'
+                ? 'bg-[#E84634] text-white shadow-sm'
+                : 'text-[#E84634]/70 hover:text-[#E84634] hover:bg-[#E84634]/10'
+            }`}
+            title="Kinetic 3D Geometry"
+          >
+            <Box size={13} />
+            <span className="hidden md:inline">3D Wireframe</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMode('terminal')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
+              mode === 'terminal'
+                ? 'bg-[#E84634] text-white shadow-sm'
+                : 'text-[#E84634]/70 hover:text-[#E84634] hover:bg-[#E84634]/10'
+            }`}
+            title="Live Interactive CLI Terminal"
+          >
+            <TerminalIcon size={13} />
+            <span className="hidden md:inline">Console</span>
+          </button>
+        </div>
+
+        {/* Right: Controls & Toggles */}
+        <div className="flex items-center gap-1.5">
+          {mode !== 'terminal' && (
+            <>
+              <button
+                type="button"
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="p-1.5 rounded-lg border border-[#E0DACE] dark:border-[#3A332E] text-[#E84634] hover:bg-[#E84634]/10 transition-colors cursor-pointer"
+                title={isPlaying ? 'Pause Physics' : 'Resume Physics'}
+              >
+                {isPlaying ? <Pause size={13} /> : <Play size={13} />}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetPositions}
+                className="p-1.5 rounded-lg border border-[#E0DACE] dark:border-[#3A332E] text-[#E84634] hover:bg-[#E84634]/10 transition-colors cursor-pointer"
+                title="Reset Layout"
+              >
+                <RotateCcw size={13} />
+              </button>
+            </>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1.5 rounded-lg border border-[#E0DACE] dark:border-[#3A332E] text-[#E84634] hover:bg-[#E84634]/10 transition-colors cursor-pointer"
+            title={isExpanded ? 'Standard View' : 'Expand Height'}
+          >
+            {isExpanded ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+          </button>
+        </div>
       </div>
 
-      {/* Subtle Interactive Hint */}
-      <div className="hidden sm:block absolute bottom-5 right-6 pointer-events-none text-[11px] font-mono uppercase tracking-widest text-[#E84634]/60">
-        Move cursor or click to perturb field
+      {/* Main Interactive Stage */}
+      <div className="relative flex-1 w-full h-full overflow-hidden flex flex-col">
+        {mode !== 'terminal' ? (
+          <>
+            <canvas
+              ref={canvasRef}
+              onMouseMove={handleMouseMove}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              className="w-full h-full cursor-crosshair block"
+            />
+
+            {/* Geometry shape quick switcher in 3D mode */}
+            {mode === 'geometry3d' && (
+              <div className="absolute top-4 left-4 z-10 flex gap-1.5 bg-white/80 dark:bg-[#1E1A18]/80 backdrop-blur-md p-1 rounded-xl border border-[#E0DACE] dark:border-[#3A332E]">
+                <button
+                  type="button"
+                  onClick={() => setGeometryShape('icosahedron')}
+                  className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg transition-all cursor-pointer ${
+                    geometryShape === 'icosahedron' ? 'bg-[#E84634] text-white' : 'text-[#E84634] hover:bg-[#E84634]/10'
+                  }`}
+                >
+                  Icosahedron
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGeometryShape('cube')}
+                  className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg transition-all cursor-pointer ${
+                    geometryShape === 'cube' ? 'bg-[#E84634] text-white' : 'text-[#E84634] hover:bg-[#E84634]/10'
+                  }`}
+                >
+                  Hypercube
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGeometryShape('torus')}
+                  className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg transition-all cursor-pointer ${
+                    geometryShape === 'torus' ? 'bg-[#E84634] text-white' : 'text-[#E84634] hover:bg-[#E84634]/10'
+                  }`}
+                >
+                  Torus Knot
+                </button>
+              </div>
+            )}
+
+            {/* Active Node Info HUD Tooltip (Network Mode) */}
+            {mode === 'network' && hoveredNode && (
+              <div className="absolute bottom-12 left-4 sm:left-6 max-w-sm p-3.5 rounded-2xl bg-white/95 dark:bg-[#1E1A18]/95 backdrop-blur-md border border-[#E84634]/40 shadow-xl pointer-events-none z-10 transition-all">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E84634]">
+                    {hoveredNode.category}
+                  </span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                </div>
+                <h4 className="text-sm font-bold text-[#E84634] leading-tight mb-1">
+                  {hoveredNode.name}
+                </h4>
+                <p className="text-xs text-[#E84634]/80 leading-relaxed mb-2 font-light">
+                  {hoveredNode.description}
+                </p>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {hoveredNode.tech.map((t, idx) => (
+                    <span 
+                      key={idx} 
+                      className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#E84634]/10 text-[#E84634] font-medium"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-[10px] font-mono text-[#E84634]/60 border-t border-[#E84634]/20 pt-1.5">
+                  {hoveredNode.metrics}
+                </p>
+              </div>
+            )}
+
+            {/* Interactive hint badge */}
+            <div className="absolute bottom-3 right-4 pointer-events-none hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-[#E84634]/70 bg-white/60 dark:bg-[#1E1A18]/60 px-3 py-1 rounded-full border border-[#E0DACE] dark:border-[#3A332E]">
+              <Sparkles size={12} className="text-[#E84634]" />
+              <span>{mode === 'network' ? 'Geser & klik node untuk interaksi physics' : 'Mode geometri 3D aktif'}</span>
+            </div>
+          </>
+        ) : (
+          /* Terminal Interactive CLI Mode */
+          <div className="flex-1 flex flex-col p-4 sm:p-6 font-mono overflow-hidden bg-[#FDFBF7] dark:bg-[#141211]">
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2 select-text">
+              {terminalHistory.map((item, index) => (
+                <div key={index} className="space-y-1">
+                  <div className="flex items-center gap-2 text-xs text-[#E84634]/80">
+                    <span className="text-[#E84634] font-bold">randy@late20s:~$</span>
+                    <span className="font-semibold text-[#E84634]">{item.command}</span>
+                    <span className="text-[10px] text-[#E84634]/50 ml-auto">{item.timestamp}</span>
+                  </div>
+                  <div className="pl-4 border-l-2 border-[#E84634]/30 py-1">
+                    {item.output}
+                  </div>
+                </div>
+              ))}
+              <div ref={terminalBottomRef} />
+            </div>
+
+            {/* Quick Command Action Chips */}
+            <div className="pt-3 pb-2 border-t border-[#E0DACE] dark:border-[#3A332E] flex flex-wrap gap-1.5">
+              <span className="text-[10px] text-[#E84634]/60 self-center mr-1">Quick:</span>
+              {['whoami', 'skills', 'projects', 'architecture', 'stats', 'help', 'clear'].map(cmd => (
+                <button
+                  key={cmd}
+                  type="button"
+                  onClick={() => handleCommandSubmit(cmd)}
+                  className="text-[11px] px-2.5 py-1 rounded-md bg-[#E84634]/10 hover:bg-[#E84634] text-[#E84634] hover:text-white font-mono font-semibold transition-all border border-[#E84634]/20 cursor-pointer"
+                >
+                  {cmd}
+                </button>
+              ))}
+            </div>
+
+            {/* Terminal Input Line */}
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCommandSubmit();
+              }}
+              className="flex items-center gap-2 pt-2 border-t border-[#E0DACE] dark:border-[#3A332E]"
+            >
+              <span className="text-xs font-bold text-[#E84634]">randy@late20s:~$</span>
+              <input
+                type="text"
+                value={terminalInput}
+                onChange={(e) => setTerminalInput(e.target.value)}
+                placeholder="Ketik command (contoh: skills, projects, whoami)..."
+                className="flex-1 bg-transparent border-none outline-none text-xs text-[#E84634] placeholder-[#E84634]/40 font-mono"
+                autoFocus
+              />
+              <button
+                type="submit"
+                className="px-3 py-1 bg-[#E84634] text-white rounded text-xs font-mono font-bold hover:opacity-90 cursor-pointer"
+              >
+                RUN
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Footer Strip */}
+      <div className="h-8 border-t border-[#E0DACE] dark:border-[#3A332E] bg-white/80 dark:bg-[#1E1A18]/90 backdrop-blur-md px-4 flex items-center justify-between text-[10px] font-mono text-[#E84634]/75 shrink-0">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex items-center gap-1.5 font-bold text-[#E84634]">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            INTERACTIVE IDENTITY ENGINE
+          </span>
+          <span className="hidden sm:inline">•</span>
+          <span className="hidden sm:inline">REACT 19 + TYPESCRIPT + FIREBASE</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link 
+            to="/projects" 
+            className="flex items-center gap-1 text-[#E84634] font-bold hover:underline"
+          >
+            <span>PROYEK TI</span>
+            <ExternalLink size={10} />
+          </Link>
+        </div>
       </div>
     </div>
   );
