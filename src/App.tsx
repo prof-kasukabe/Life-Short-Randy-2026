@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './ThemeProvider';
 import { Navbar } from './components/Navbar';
-import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Portfolio } from './pages/Portfolio';
@@ -16,69 +15,37 @@ import { Media } from './pages/Media';
 import { Bookmarks } from './pages/Bookmarks';
 import { BlogPostDetail } from './pages/BlogPostDetail';
 import { Contact } from './pages/Contact';
-
 import { Admin } from './pages/Admin';
-
 import { DitherTool } from './pages/DitherTool';
 import { CreativeScratch } from './pages/CreativeScratch';
-
-function AppLayout() {
-  const location = useLocation();
-  const boardRoutes = new Set([
-    '/',
-    '/about',
-    '/projects',
-    '/it-projects',
-    '/curated',
-    '/blog',
-    '/media',
-    '/bookmarks',
-    '/contact'
-  ]);
-  const isBoardRoute = boardRoutes.has(location.pathname);
-
-  return (
-    <div
-      className={`flex flex-col bg-[#6E7B6D] dark:bg-[#2C302E] p-2 sm:p-4 md:p-6 transition-colors duration-300 ${
-        isBoardRoute ? 'h-screen overflow-hidden' : 'min-h-screen'
-      }`}
-    >
-      <div
-        className={`flex-grow flex flex-col bg-[#FAFAF5] dark:bg-[#1E1A18] rounded-[1.75rem] overflow-hidden shadow-2xl relative w-full max-w-[1440px] mx-auto border border-[#E0DACE] dark:border-[#3A332E] ${
-          isBoardRoute ? 'h-full min-h-0' : ''
-        }`}
-      >
-        <Navbar />
-        <main className={`flex-grow flex flex-col ${isBoardRoute ? 'min-h-0 overflow-hidden' : ''}`}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/projects" element={<ITProjects />} />
-            <Route path="/it-projects" element={<ITProjects />} />
-            <Route path="/curated" element={<Portfolio />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/media" element={<Media />} />
-            <Route path="/bookmarks" element={<Bookmarks />} />
-            <Route path="/blog/:id" element={<BlogPostDetail />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/tools/dither" element={<DitherTool />} />
-            <Route path="/tools/scratch" element={<CreativeScratch />} />
-          </Routes>
-        </main>
-        {!isBoardRoute && <Footer />}
-      </div>
-    </div>
-  );
-}
 
 export default function App() {
   return (
     <ThemeProvider>
       <Router>
-        <AppLayout />
+        <div className="min-h-screen flex flex-col bg-[#EAE6DF] dark:bg-[#12100E] p-2 sm:p-4 lg:p-6 transition-colors duration-300">
+          <div className="flex-grow flex flex-col bg-[#FAFAF7] dark:bg-[#191614] rounded-2xl sm:rounded-[1.75rem] shadow-[0_12px_40px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] relative w-full max-w-[1380px] mx-auto border border-[#E2DDD5] dark:border-[#2C2623] overflow-x-hidden">
+            <Navbar />
+            <main className="flex-grow flex flex-col">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/projects" element={<ITProjects />} />
+                <Route path="/it-projects" element={<ITProjects />} />
+                <Route path="/curated" element={<Portfolio />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/media" element={<Media />} />
+                <Route path="/bookmarks" element={<Bookmarks />} />
+                <Route path="/blog/:id" element={<BlogPostDetail />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/tools/dither" element={<DitherTool />} />
+                <Route path="/tools/scratch" element={<CreativeScratch />} />
+              </Routes>
+            </main>
+          </div>
+        </div>
       </Router>
     </ThemeProvider>
   );
 }
-

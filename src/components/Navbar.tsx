@@ -1,103 +1,155 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { Moon, Sun, Menu, X, Home, User, Palette, BookOpen, PlaySquare, Bookmark, Mail, Settings, Code2 } from 'lucide-react';
+import { NavLink, Link } from 'react-router-dom';
+import {
+  Moon,
+  Sun,
+  Menu,
+  X,
+  Home,
+  User,
+  Palette,
+  BookOpen,
+  PlaySquare,
+  Bookmark,
+  Mail,
+  Code2,
+  Sparkles
+} from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
+import avatarImg from '../assets/images/avatar_male_icon_1785945271495.jpg';
 
 export function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
-
   const navLinks = [
     { name: 'Home', path: '/', icon: Home },
     { name: 'About', path: '/about', icon: User },
-    { name: 'IT Projects', path: '/projects', icon: Code2 },
+    { name: 'Projects', path: '/projects', icon: Code2 },
     { name: 'Curated', path: '/curated', icon: Palette },
-    { name: 'Reading List', path: '/blog', icon: BookOpen },
+    { name: 'Reading', path: '/blog', icon: BookOpen },
     { name: 'Media', path: '/media', icon: PlaySquare },
     { name: 'Bookmarks', path: '/bookmarks', icon: Bookmark },
-    { name: 'Contact', path: '/contact', icon: Mail },
+    { name: 'Contact', path: '/contact', icon: Mail }
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-[#FAFAF5]/90 dark:bg-[#1E1A18]/90 backdrop-blur-md border-b border-[#E0DACE] dark:border-[#3A332E]">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <div className="flex justify-between items-center h-16">
-          {/* Desktop Nav */}
-          <div className="hidden lg:flex flex-1 justify-between items-center w-full">
+    <header className="sticky top-0 z-50 bg-[#FAFAF7]/90 dark:bg-[#191614]/90 backdrop-blur-md border-b border-[#E2DDD5] dark:border-[#2C2623]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-4">
+          {/* Left: Minimalist Brand Identity */}
+          <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+            <img
+              src={avatarImg}
+              alt="Randy"
+              className="w-7 h-7 rounded-full object-cover border border-[#E84634]/40 group-hover:scale-105 transition-transform"
+            />
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-lg font-serif-display font-bold tracking-tight text-[#231F1C] dark:text-[#F5F2EB]">
+                Randy<span className="text-[#E84634]">.</span>
+              </span>
+              <span className="hidden xl:inline-block text-[10px] font-mono uppercase tracking-widest text-[#7A7267] dark:text-[#9E9589]">
+                Late 20s
+              </span>
+            </div>
+          </Link>
+
+          {/* Center: Clean Figma-Style Segmented Navigation (Desktop) */}
+          <nav className="hidden lg:flex items-center gap-1 p-1 rounded-full bg-[#F0ECE4]/80 dark:bg-[#221E1B] border border-[#E2DDD5]/80 dark:border-[#2E2824]">
             {navLinks.map((link) => (
               <NavLink
                 key={link.name}
                 to={link.path}
+                end={link.path === '/'}
                 className={({ isActive }) =>
-                  `text-sm font-serif-display uppercase tracking-widest transition-all ${
+                  `px-3.5 py-1 rounded-full text-xs font-medium transition-all ${
                     isActive
-                      ? 'text-[#E84634] font-bold'
-                      : 'text-[#E84634]/70 hover:text-[#E84634]'
+                      ? 'bg-white dark:bg-[#191614] text-[#E84634] font-semibold shadow-2xs'
+                      : 'text-[#5C544B] dark:text-[#B8AFA3] hover:text-[#231F1C] dark:hover:text-white'
                   }`
                 }
               >
                 {link.name}
               </NavLink>
             ))}
+          </nav>
+
+          {/* Right: Quick Tools & Theme Toggle */}
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to="/tools/dither"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border border-[#E2DDD5] dark:border-[#2E2824] bg-white/70 dark:bg-[#221E1B] text-[#231F1C] dark:text-[#F5F2EB] hover:border-[#E84634] hover:text-[#E84634] transition-colors"
+            >
+              <Sparkles size={12} className="text-[#E84634]" />
+              <span>Dither Lab</span>
+            </Link>
+
             <button
+              type="button"
               onClick={toggleTheme}
-              className="p-2 rounded-full text-[#E84634]/70 hover:text-[#E84634] transition-colors ml-4"
+              className="p-2 rounded-full border border-[#E2DDD5] dark:border-[#2E2824] bg-white/70 dark:bg-[#221E1B] text-[#5C544B] dark:text-[#B8AFA3] hover:text-[#E84634] hover:border-[#E84634] transition-colors cursor-pointer"
               aria-label="Toggle Dark Mode"
             >
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
             </button>
-          </div>
 
-          {/* Mobile Header (Shows Logo since links are hidden) */}
-          <div className="flex lg:hidden items-center justify-between w-full">
-            <NavLink to="/" className="text-2xl font-serif-display tracking-tight text-[#E84634] flex items-center gap-1 group">
-              Randy.
-            </NavLink>
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-full text-[#E84634]/70 hover:text-[#E84634] transition-colors"
-                aria-label="Toggle Dark Mode"
-              >
-                {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
-              </button>
-              <button
-                onClick={toggleMenu}
-                className="p-2 rounded-md text-[#E84634]/70 hover:text-[#E84634] transition-colors"
-              >
-                {isOpen ? <X size={22} /> : <Menu size={22} />}
-              </button>
-            </div>
+            {/* Mobile Hamburger Button */}
+            <button
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              className="lg:hidden p-2 rounded-full border border-[#E2DDD5] dark:border-[#2E2824] bg-white/70 dark:bg-[#221E1B] text-[#231F1C] dark:text-[#F5F2EB] hover:text-[#E84634] transition-colors"
+              aria-label="Open Menu"
+            >
+              {isOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Nav */}
+      {/* Mobile Dropdown Drawer */}
       {isOpen && (
-        <div className="lg:hidden border-t border-[#4A3F35]/10 dark:border-[#FDFBF7]/10 bg-[#FDFBF7]/95 dark:bg-[#1E1A18]/95 backdrop-blur-lg">
-          <div className="px-3 pt-3 pb-4 space-y-1 shadow-lg">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.name}
-                to={link.path}
-                onClick={() => setIsOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-base font-medium transition-colors ${
-                    isActive
-                      ? 'bg-[#E07A5F]/10 text-[#E84634] font-semibold'
-                      : 'text-[#E84634]/80 dark:text-[#E84634]/80 hover:bg-[#4A3F35]/5 dark:hover:bg-[#FDFBF7]/5'
-                  }`
-                }
-              >
-                <link.icon size={18} />
-                {link.name}
-              </NavLink>
-            ))}
+        <div className="lg:hidden border-t border-[#E2DDD5] dark:border-[#2C2623] bg-[#FAFAF7] dark:bg-[#191614] px-4 pt-3 pb-5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <NavLink
+                  key={link.name}
+                  to={link.path}
+                  end={link.path === '/'}
+                  onClick={() => setIsOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium border transition-all ${
+                      isActive
+                        ? 'bg-[#E84634] text-white border-[#E84634] font-semibold'
+                        : 'bg-white dark:bg-[#221E1B] text-[#231F1C] dark:text-[#F5F2EB] border-[#E2DDD5] dark:border-[#2E2824]'
+                    }`
+                  }
+                >
+                  <Icon size={15} />
+                  <span>{link.name}</span>
+                </NavLink>
+              );
+            })}
+          </div>
+          <div className="mt-3 pt-3 border-t border-[#E2DDD5] dark:border-[#2C2623] flex gap-2">
+            <Link
+              to="/tools/dither"
+              onClick={() => setIsOpen(false)}
+              className="flex-1 text-center py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-[#F0ECE4] dark:bg-[#221E1B] text-[#E84634] font-semibold"
+            >
+              Dither Studio
+            </Link>
+            <Link
+              to="/tools/scratch"
+              onClick={() => setIsOpen(false)}
+              className="flex-1 text-center py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-[#F0ECE4] dark:bg-[#221E1B] text-[#E84634] font-semibold"
+            >
+              Creative Scratch
+            </Link>
           </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 }

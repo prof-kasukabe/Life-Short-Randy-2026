@@ -102,10 +102,10 @@ export function ITProjects() {
         onSearchChange={setSearchQuery}
         searchPlaceholder="Search stack or project..."
         sidebarExtraSlot={
-          <div className="space-y-1">
-            <div className="px-2 text-[10px] font-mono uppercase tracking-wider text-[#6E655B] dark:text-[#A39B8F]">
-              Domain Filter
-            </div>
+          <div className="flex items-center gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden py-0.5">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#7A7267] dark:text-[#9E9589] mr-1 shrink-0">
+              Domain:
+            </span>
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -114,10 +114,10 @@ export function ITProjects() {
                   setCategoryFilter(cat);
                   setSelectedProject(null);
                 }}
-                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
+                className={`px-3 py-1 rounded-full text-xs transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   categoryFilter === cat
-                    ? 'bg-[#E84634]/15 text-[#E84634] font-semibold'
-                    : 'text-[#6E655B] dark:text-[#A39B8F] hover:text-[#E84634]'
+                    ? 'bg-[#E84634] text-white font-semibold'
+                    : 'bg-[#F2EFE9] dark:bg-[#211D1A] text-[#6E655B] dark:text-[#A39B8F] hover:text-[#E84634]'
                 }`}
               >
                 {cat}
