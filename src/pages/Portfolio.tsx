@@ -61,8 +61,8 @@ export function Portfolio() {
   }, [portfolioData, searchQuery]);
 
   const tabs: BoardTabItem[] = [
-    { id: 'verbal-shelf', label: 'Curated Verbal (3D Shelf)', icon: Library, badge: allVerbalItems.length },
-    { id: 'verbal-board', label: 'Verbal Board Grid', icon: LayoutGrid, badge: allVerbalItems.length },
+    { id: 'verbal-shelf', label: 'Verbal 3D Shelf', icon: Library, badge: allVerbalItems.length },
+    { id: 'verbal-board', label: 'Verbal Grid', icon: LayoutGrid, badge: allVerbalItems.length },
     { id: 'visual', label: 'Curated Visual', icon: Palette, badge: visualData.length }
   ];
 
@@ -88,42 +88,40 @@ export function Portfolio() {
         }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search volumes or visuals..."
+        searchPlaceholder="Search volumes..."
       >
         {activeTab === 'verbal-shelf' && (
           <CuratedVerbalShelf items={portfolioData} searchQuery={searchQuery} />
         )}
 
         {activeTab === 'verbal-board' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
             {allVerbalItems.map((item, idx) => (
               <div
                 key={item.id}
                 onClick={() => setActiveTab('verbal-shelf')}
-                className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE]/80 dark:border-[#332D29] hover:border-[#E84634] p-4 flex flex-col justify-between min-h-[185px] transition-all cursor-pointer shadow-2xs"
+                className="group rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 hover:border-[#E84634]/70 p-4 flex flex-col justify-between min-h-[170px] transition-all cursor-pointer"
               >
                 <div>
-                  <div className="flex items-center justify-between text-[11px] font-mono text-[#6E655B] dark:text-[#A39B8F] mb-2">
-                    <span className="font-bold text-[#2A2521] dark:text-[#F5F2EB]">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-[#71717A] dark:text-zinc-500 mb-2">
+                    <span className="font-bold text-[#18181B] dark:text-zinc-300">
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                     <span>{item.date || '2026'}</span>
                   </div>
-                  <h3 className="text-base font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors leading-snug mb-1.5">
+                  <h3 className="text-lg font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] transition-colors leading-snug mb-1.5">
                     {item.title}
                   </h3>
-                  <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-[#52525B] dark:text-zinc-400 line-clamp-2 leading-relaxed">
                     {item.description}
                   </p>
                 </div>
 
-                <div className="mt-3 pt-2 border-t border-[#E0DACE]/50 dark:border-[#2E2824] flex items-center justify-between text-[10px] font-mono">
-                  <span className="px-2 py-0.5 rounded bg-[#E84634]/12 text-[#E84634] font-semibold">
+                <div className="mt-3 pt-2 border-t border-black/10 dark:border-white/10 flex items-center justify-between text-[11px] font-mono text-[#71717A] dark:text-zinc-500">
+                  <span className="text-[#E84634] font-semibold">
                     {item.category || 'Verbal'}
                   </span>
-                  <span className="text-[#6E655B] dark:text-[#A39B8F] group-hover:text-[#E84634]">
-                    Open 3D Shelf &rarr;
-                  </span>
+                  <span className="group-hover:text-[#E84634]">Open 3D Shelf &rarr;</span>
                 </div>
               </div>
             ))}
@@ -133,17 +131,17 @@ export function Portfolio() {
         {activeTab === 'visual' && (
           <>
             {selectedVisual ? (
-              <div className="rounded-2xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] p-6 max-w-4xl mx-auto">
+              <div className="rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 p-6">
                 <button
                   type="button"
                   onClick={() => setSelectedVisual(null)}
                   className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[#E84634] hover:underline mb-4 cursor-pointer"
                 >
                   <ArrowLeft size={14} />
-                  <span>Back to Visual Board</span>
+                  <span>Back to Visual Grid</span>
                 </button>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                  <div className="lg:col-span-7 rounded-xl overflow-hidden bg-black/5 border border-[#E0DACE] dark:border-[#332D29]">
+                  <div className="lg:col-span-7 rounded-xl overflow-hidden bg-black/5 border border-black/10 dark:border-white/10">
                     {selectedVisual.mediaType === 'video' ? (
                       <video
                         src={selectedVisual.mediaUrl}
@@ -162,14 +160,14 @@ export function Portfolio() {
                     )}
                   </div>
                   <div className="lg:col-span-5 space-y-3">
-                    <h3 className="text-2xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB]">
+                    <h3 className="text-2xl font-serif-display font-bold text-[#18181B] dark:text-white">
                       {selectedVisual.title || 'Visual Artifact'}
                     </h3>
                     {selectedVisual.date && (
                       <div className="text-xs font-mono text-[#E84634]">{selectedVisual.date}</div>
                     )}
                     {selectedVisual.description && (
-                      <p className="text-xs sm:text-sm text-[#6E655B] dark:text-[#A39B8F] leading-relaxed">
+                      <p className="text-xs sm:text-sm text-[#52525B] dark:text-zinc-400 leading-relaxed">
                         {selectedVisual.description}
                       </p>
                     )}
@@ -177,14 +175,14 @@ export function Portfolio() {
                 </div>
               </div>
             ) : visualData.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 {visualData.map((item, idx) => (
                   <div
                     key={item.id}
                     onClick={() => setSelectedVisual(item)}
-                    className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] hover:border-[#E84634] overflow-hidden cursor-pointer transition-all"
+                    className="group rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 hover:border-[#E84634]/70 overflow-hidden cursor-pointer transition-all"
                   >
-                    <div className="aspect-[4/3] bg-zinc-100 dark:bg-zinc-900 overflow-hidden relative">
+                    <div className="aspect-[4/3] bg-zinc-900 overflow-hidden relative">
                       {item.mediaType === 'video' ? (
                         <video
                           src={item.mediaUrl}
@@ -202,16 +200,16 @@ export function Portfolio() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       )}
-                      <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/60 text-white text-[10px] font-mono">
-                        {String(idx + 1).padStart(2, '0')}
-                      </span>
                     </div>
                     <div className="p-3.5">
-                      <h3 className="text-sm font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] truncate">
+                      <div className="text-[10px] font-mono text-[#71717A] dark:text-zinc-500 mb-1">
+                        {String(idx + 1).padStart(2, '0')} · Visual
+                      </div>
+                      <h3 className="text-sm font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] truncate">
                         {item.title || 'Visual Study'}
                       </h3>
                       {item.description && (
-                        <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 mt-1">
+                        <p className="text-xs text-[#52525B] dark:text-zinc-400 line-clamp-2 mt-1">
                           {item.description}
                         </p>
                       )}
@@ -220,8 +218,8 @@ export function Portfolio() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20 text-sm text-[#6E655B] dark:text-[#A39B8F]">
-                No visual projects uploaded yet. Switch to Curated Verbal to explore the 3D Spine Shelf.
+              <div className="text-center py-16 text-xs sm:text-sm text-[#71717A] dark:text-zinc-500">
+                No visual projects uploaded yet. Explore the 3D Verbal Shelf tab to inspect archival volumes.
               </div>
             )}
           </>

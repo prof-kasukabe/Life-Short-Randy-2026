@@ -14,27 +14,26 @@
 @layer base {
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Instrument Serif', 'Playfair Display', Georgia, serif;
-    @apply tracking-tight text-[#E84634];
+    @apply tracking-tight;
   }
 }
 
 ::selection {
-  background-color: rgba(232, 70, 52, 0.25);
-  color: #E84634;
+  background-color: rgba(232, 70, 52, 0.28);
+  color: #ffffff;
 }
 
 body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  @apply bg-[#FDFBF7] text-[#E84634] antialiased transition-colors duration-300;
+  @apply bg-[#EAE6DF] text-[#1C1917] antialiased transition-colors duration-300;
 }
 
 .dark body {
-  @apply bg-[#1E1A18] text-[#E84634];
+  @apply bg-[#09090B] text-[#F4F4F5];
 }
 
 @keyframes float {
   0% { transform: translateY(0px); }
-  50% { transform: translateY(-15px); }
+  50% { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
 }
-

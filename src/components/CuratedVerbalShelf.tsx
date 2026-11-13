@@ -327,7 +327,7 @@ export function CuratedVerbalShelf({ items, searchQuery = '' }: CuratedVerbalShe
   // DETAIL VIEW (Matches Screenshot 2: "The Silent Valley" split layout)
   if (selectedItem) {
     return (
-      <div className="relative w-full min-h-[640px] py-8 px-4 sm:px-10 bg-[#F5F2EB] dark:bg-[#191614] border border-[#DFD9CE] dark:border-[#332D29] rounded-[1.5rem] shadow-inner transition-all duration-500">
+      <div className="relative w-full min-h-[600px] py-8 px-4 sm:px-10 bg-[#F5F2EB] dark:bg-[#141416] border border-[#DFD9CE] dark:border-white/10 rounded-2xl transition-all duration-500">
         {/* Top Bar */}
         <div className="flex items-center justify-between mb-12 sm:mb-16">
           <button
@@ -470,7 +470,7 @@ export function CuratedVerbalShelf({ items, searchQuery = '' }: CuratedVerbalShe
 
   // SHELF VIEW (Matches Screenshot 1: Horizontal 3D VHS / Book Spine Rack)
   return (
-    <div className="relative w-full py-8 px-3 sm:px-8 bg-[#F5F2EB] dark:bg-[#191614] border border-[#DFD9CE] dark:border-[#332D29] rounded-[1.5rem] shadow-inner overflow-hidden transition-colors duration-300">
+    <div className="relative w-full py-7 px-3 sm:px-8 bg-[#F5F2EB] dark:bg-[#141416] border border-[#DFD9CE] dark:border-white/10 rounded-2xl overflow-hidden transition-colors duration-300">
       {/* Top Archival Header */}
       <div className="flex items-center justify-between mb-6 px-2">
         <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#2A2521]/70 dark:text-[#E5DEC9]/70 border border-[#2A2521]/30 dark:border-[#E5DEC9]/30 px-2.5 py-1">

@@ -65,7 +65,7 @@ export function Blog() {
     },
     {
       id: 'external',
-      label: 'External Publications',
+      label: 'External',
       icon: ExternalLink,
       badge: blogData.filter((p) => Boolean(p.url)).length
     }
@@ -93,29 +93,29 @@ export function Blog() {
         }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search articles & notes..."
+        searchPlaceholder="Search articles..."
       >
         {selectedPost ? (
-          <div className="bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] rounded-2xl p-6 sm:p-8 max-w-3xl mx-auto">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#E0DACE] dark:border-[#332D29]">
+          <div className="rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 p-5 sm:p-7">
+            <div className="flex items-center justify-between mb-5 pb-3 border-b border-black/10 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setSelectedPost(null)}
                 className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[#E84634] hover:underline cursor-pointer"
               >
                 <ArrowLeft size={14} />
-                <span>Back to Reading Board</span>
+                <span>Back to Reading List</span>
               </button>
-              <span className="text-xs font-serif-display italic text-[#6E655B] dark:text-[#A39B8F]">
+              <span className="text-xs font-serif-display italic text-[#71717A] dark:text-zinc-400">
                 {selectedPost.date} · {selectedPost.readTime || '5 min read'}
               </span>
             </div>
 
-            <h3 className="text-3xl sm:text-4xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] mb-4">
+            <h3 className="text-2xl sm:text-3xl font-serif-display font-bold text-[#18181B] dark:text-white mb-4">
               {selectedPost.title}
             </h3>
 
-            <p className="text-sm sm:text-base text-[#4A3F35] dark:text-[#D8D0C5] leading-relaxed whitespace-pre-line mb-6">
+            <p className="text-sm sm:text-base text-[#3F3F46] dark:text-zinc-300 leading-relaxed whitespace-pre-line mb-6">
               {selectedPost.content ||
                 selectedPost.excerpt ||
                 'Reflections and field notes written by Randy Ardiansyah on minimalist engineering, calm technology, and deliberate creative systems.'}
@@ -127,7 +127,7 @@ export function Blog() {
                   href={selectedPost.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#E84634] text-white text-xs font-semibold"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#18181B] dark:bg-white text-white dark:text-[#0D0D0F] text-xs font-semibold"
                 >
                   <span>Open Original ({getDomain(selectedPost.url)})</span>
                   <ExternalLink size={13} />
@@ -135,65 +135,47 @@ export function Blog() {
               ) : (
                 <Link
                   to={`/blog/${selectedPost.id}`}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#E84634] text-white text-xs font-semibold"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#18181B] dark:bg-white text-white dark:text-[#0D0D0F] text-xs font-semibold"
                 >
-                  <span>Open Dedicated Reader Page</span>
+                  <span>Open Full Reader</span>
                   <ArrowUpRight size={13} />
                 </Link>
               )}
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-            {filteredPosts.map((post, idx) => {
-              const tagColors = [
-                'bg-[#E84634]/12 text-[#E84634]',
-                'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-                'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-                'bg-sky-500/15 text-sky-700 dark:text-sky-300'
-              ];
-              const badgeClass = tagColors[idx % tagColors.length];
-
-              return (
-                <article
-                  key={post.id}
-                  onClick={() => setSelectedPost(post)}
-                  className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE]/80 dark:border-[#332D29] hover:border-[#E84634] p-4 flex flex-col justify-between min-h-[180px] transition-all cursor-pointer shadow-2xs"
-                >
-                  <div>
-                    <div className="flex items-center justify-between text-xs mb-2">
-                      <span className="font-mono font-bold text-[#2A2521] dark:text-[#F5F2EB]">
-                        {String(idx + 1).padStart(2, '0')}
-                      </span>
-                      <time className="text-[11px] font-serif-display italic text-[#6E655B] dark:text-[#A39B8F]">
-                        {post.date}
-                      </time>
-                    </div>
-
-                    <h3 className="text-base font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors leading-snug mb-2">
+          <div className="divide-y divide-black/10 dark:divide-white/10">
+            {filteredPosts.map((post, idx) => (
+              <article
+                key={post.id}
+                onClick={() => setSelectedPost(post)}
+                className="group py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 cursor-pointer"
+              >
+                <div className="flex items-baseline gap-3 min-w-0">
+                  <span className="text-xs font-mono text-[#71717A] dark:text-zinc-500 shrink-0">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="text-base sm:text-lg font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] transition-colors leading-snug">
                       {post.title}
                     </h3>
-
                     {post.excerpt && (
-                      <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-[#52525B] dark:text-zinc-400 line-clamp-1 mt-0.5">
                         {post.excerpt}
                       </p>
                     )}
                   </div>
+                </div>
 
-                  <div className="mt-3 pt-2">
-                    <div
-                      className={`w-full px-2.5 py-1 rounded-md text-[10px] font-mono font-semibold flex items-center justify-between ${badgeClass}`}
-                    >
-                      <span className="truncate">
-                        {post.url ? getDomain(post.url) : 'Randy Journal'}
-                      </span>
-                      <span>{post.readTime || '5m'}</span>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
+                <div className="flex items-center gap-3 text-[11px] font-mono text-[#71717A] dark:text-zinc-500 shrink-0 pl-7 sm:pl-0">
+                  <span>{post.url ? getDomain(post.url) : 'Journal'}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>{post.readTime || '5m'}</span>
+                  <span aria-hidden="true">·</span>
+                  <time className="text-[#18181B] dark:text-zinc-300">{post.date}</time>
+                </div>
+              </article>
+            ))}
           </div>
         )}
       </BoardPageLayout>

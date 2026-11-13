@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import {
-  Code2,
   ExternalLink,
   Github,
   Layers,
@@ -75,7 +74,7 @@ export function ITProjects() {
   const tabs: BoardTabItem[] = [
     { id: 'all', label: 'All Initiatives', icon: Layers, badge: projects.length },
     { id: 'in_progress', label: 'In Progress', icon: Clock, badge: inProgressCount },
-    { id: 'completed', label: 'Delivered Systems', icon: CheckCircle2, badge: completedCount }
+    { id: 'completed', label: 'Delivered', icon: CheckCircle2, badge: completedCount }
   ];
 
   return (
@@ -89,7 +88,7 @@ export function ITProjects() {
       </Helmet>
 
       <BoardPageLayout
-        pageTitle="Architected Systems & IT Projects"
+        pageTitle="Architected Systems"
         pageSubtitle="Autonomous AI pipelines, real-time telemetry, and production full-stack platforms."
         breadcrumbCategory="IT Projects"
         tabs={tabs}
@@ -100,10 +99,10 @@ export function ITProjects() {
         }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search stack or project..."
+        searchPlaceholder="Search stack..."
         sidebarExtraSlot={
-          <div className="flex items-center gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden py-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#7A7267] dark:text-[#9E9589] mr-1 shrink-0">
+          <div className="flex items-center gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden py-0.5 text-xs">
+            <span className="text-[11px] font-mono text-[#71717A] dark:text-zinc-500 mr-1 shrink-0">
               Domain:
             </span>
             {categories.map((cat) => (
@@ -114,10 +113,10 @@ export function ITProjects() {
                   setCategoryFilter(cat);
                   setSelectedProject(null);
                 }}
-                className={`px-3 py-1 rounded-full text-xs transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`px-3 py-1 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   categoryFilter === cat
                     ? 'bg-[#E84634] text-white font-semibold'
-                    : 'bg-[#F2EFE9] dark:bg-[#211D1A] text-[#6E655B] dark:text-[#A39B8F] hover:text-[#E84634]'
+                    : 'bg-black/[0.04] dark:bg-[#161618] text-[#52525B] dark:text-zinc-400 hover:text-[#18181B] dark:hover:text-white'
                 }`}
               >
                 {cat}
@@ -126,30 +125,28 @@ export function ITProjects() {
           </div>
         }
       >
-        {/* IN-STAGE ARCHITECTURE INSPECTOR */}
         {selectedProject ? (
-          <div className="rounded-2xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] p-5 sm:p-7 max-w-4xl mx-auto">
-            <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-[#E0DACE] dark:border-[#332D29]">
+          <div className="rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 p-5 sm:p-7">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-black/10 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setSelectedProject(null)}
                 className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[#E84634] hover:underline cursor-pointer"
               >
                 <ArrowLeft size={14} />
-                <span>Back to Projects Board</span>
+                <span>Back to Projects</span>
               </button>
 
-              <div className="flex items-center gap-2 text-xs font-mono">
+              <div className="flex items-center gap-3 text-xs font-mono">
                 <span
-                  className={`px-2.5 py-0.5 rounded font-bold uppercase ${
-                    selectedProject.status === 'in_progress'
-                      ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
-                      : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                  className={`font-semibold uppercase ${
+                    selectedProject.status === 'in_progress' ? 'text-amber-500' : 'text-emerald-500'
                   }`}
                 >
                   {selectedProject.status === 'in_progress' ? 'In Progress' : 'Delivered'}
                 </span>
-                <span className="text-[#6E655B] dark:text-[#A39B8F]">{selectedProject.timeline}</span>
+                <span className="text-[#71717A] dark:text-zinc-500">·</span>
+                <span className="text-[#71717A] dark:text-zinc-400">{selectedProject.timeline}</span>
               </div>
             </div>
 
@@ -158,23 +155,23 @@ export function ITProjects() {
                 <div className="text-xs font-mono uppercase tracking-widest text-[#E84634] font-semibold">
                   {selectedProject.category}
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] leading-tight">
+                <h3 className="text-2xl sm:text-3xl font-serif-display font-bold text-[#18181B] dark:text-white leading-tight">
                   {selectedProject.title}
                 </h3>
-                <p className="text-xs sm:text-sm font-medium text-[#E84634]/85">
+                <p className="text-xs sm:text-sm font-medium text-[#52525B] dark:text-zinc-300">
                   {selectedProject.tagline}
                 </p>
-                <p className="text-xs sm:text-sm text-[#4A3F35] dark:text-[#D8D0C5] leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#52525B] dark:text-zinc-400 leading-relaxed">
                   {selectedProject.description}
                 </p>
 
                 {selectedProject.architectureSummary && (
-                  <div className="p-3.5 rounded-xl bg-[#F5F2EB] dark:bg-[#191614] border border-[#E0DACE] dark:border-[#332D29]">
+                  <div className="p-3.5 rounded-xl bg-black/[0.03] dark:bg-[#0D0D0F] border border-black/10 dark:border-white/10">
                     <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase text-[#E84634] mb-1">
                       <Terminal size={13} />
-                      <span>System Architecture Blueprint</span>
+                      <span>System Architecture</span>
                     </div>
-                    <p className="text-xs text-[#4A3F35] dark:text-[#D8D0C5] leading-relaxed">
+                    <p className="text-xs text-[#52525B] dark:text-zinc-400 leading-relaxed">
                       {selectedProject.architectureSummary}
                     </p>
                   </div>
@@ -182,14 +179,14 @@ export function ITProjects() {
 
                 {selectedProject.features && selectedProject.features.length > 0 && (
                   <div className="space-y-1.5 pt-1">
-                    <div className="text-xs font-mono uppercase tracking-wider text-[#6E655B] dark:text-[#A39B8F] font-semibold">
-                      Key Engineering Highlights
+                    <div className="text-xs font-mono uppercase tracking-wider text-[#71717A] dark:text-zinc-500 font-semibold">
+                      Key Highlights
                     </div>
                     <ul className="space-y-1.5">
                       {selectedProject.features.map((feat, i) => (
                         <li
                           key={i}
-                          className="text-xs text-[#4A3F35] dark:text-[#D8D0C5] flex items-start gap-2"
+                          className="text-xs text-[#52525B] dark:text-zinc-400 flex items-start gap-2"
                         >
                           <span className="text-[#E84634] font-mono font-bold mt-0.5">&bull;</span>
                           <span>{feat}</span>
@@ -202,7 +199,7 @@ export function ITProjects() {
 
               <div className="lg:col-span-5 flex flex-col justify-between gap-4">
                 {selectedProject.imageUrl && (
-                  <div className="aspect-video w-full rounded-xl overflow-hidden border border-[#E0DACE] dark:border-[#332D29]">
+                  <div className="aspect-video w-full rounded-xl overflow-hidden border border-black/10 dark:border-white/10">
                     <img
                       src={selectedProject.imageUrl}
                       alt={selectedProject.title}
@@ -211,19 +208,12 @@ export function ITProjects() {
                   </div>
                 )}
 
-                <div className="p-4 rounded-xl bg-[#F5F2EB] dark:bg-[#191614] border border-[#E0DACE] dark:border-[#332D29] space-y-3">
-                  <div className="text-[11px] font-mono uppercase tracking-wider text-[#6E655B] dark:text-[#A39B8F]">
+                <div className="p-4 rounded-xl bg-black/[0.03] dark:bg-[#0D0D0F] border border-black/10 dark:border-white/10 space-y-3">
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-[#71717A] dark:text-zinc-500">
                     Technology Stack
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedProject.techStack.map((t) => (
-                      <span
-                        key={t}
-                        className="text-[11px] font-mono px-2 py-0.5 rounded bg-white dark:bg-[#24201D] text-[#E84634] border border-[#E0DACE] dark:border-[#332D29]"
-                      >
-                        {t}
-                      </span>
-                    ))}
+                  <div className="text-xs font-mono text-[#18181B] dark:text-zinc-300 leading-relaxed">
+                    {selectedProject.techStack.join(' · ')}
                   </div>
 
                   <div className="pt-3 flex flex-wrap gap-2">
@@ -232,7 +222,7 @@ export function ITProjects() {
                         href={selectedProject.demoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#E84634] text-white text-xs font-semibold hover:opacity-90"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#18181B] dark:bg-white text-white dark:text-[#0D0D0F] text-xs font-semibold hover:opacity-90"
                       >
                         <span>Live Demo</span>
                         <ExternalLink size={12} />
@@ -243,7 +233,7 @@ export function ITProjects() {
                         href={selectedProject.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-[#E0DACE] dark:border-[#3A332E] bg-white dark:bg-[#24201D] text-xs font-semibold text-[#2A2521] dark:text-[#F5F2EB] hover:border-[#E84634]"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-black/10 dark:border-white/12 text-xs font-semibold text-[#18181B] dark:text-zinc-200 hover:border-[#E84634]"
                       >
                         <Github size={13} />
                         <span>Repository</span>
@@ -255,36 +245,33 @@ export function ITProjects() {
             </div>
           </div>
         ) : (
-          /* BOARD-UI PROJECT CARDS MATRIX */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {filteredProjects.map((p, idx) => {
               const isOngoing = p.status === 'in_progress';
               return (
                 <div
                   key={p.id}
                   onClick={() => setSelectedProject(p)}
-                  className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE]/80 dark:border-[#332D29] hover:border-[#E84634] p-4 flex flex-col justify-between min-h-[210px] transition-all cursor-pointer shadow-2xs"
+                  className="group rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 hover:border-[#E84634]/70 p-4 flex flex-col justify-between min-h-[190px] transition-all cursor-pointer"
                 >
                   <div>
                     <div className="flex items-center justify-between text-[11px] font-mono mb-2">
-                      <span className="font-bold text-[#2A2521] dark:text-[#F5F2EB]">
+                      <span className="font-bold text-[#18181B] dark:text-zinc-300">
                         {String(idx + 1).padStart(2, '0')} · {p.category}
                       </span>
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                          isOngoing
-                            ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
-                            : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                        className={`font-semibold uppercase ${
+                          isOngoing ? 'text-amber-500' : 'text-emerald-500'
                         }`}
                       >
                         {isOngoing ? 'In Progress' : 'Delivered'}
                       </span>
                     </div>
 
-                    <h3 className="text-base font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors leading-snug mb-1.5">
+                    <h3 className="text-lg font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] transition-colors leading-snug mb-1.5">
                       {p.title}
                     </h3>
-                    <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 leading-relaxed mb-3">
+                    <p className="text-xs text-[#52525B] dark:text-zinc-400 line-clamp-2 leading-relaxed mb-3">
                       {p.description}
                     </p>
                   </div>
@@ -292,11 +279,11 @@ export function ITProjects() {
                   <div>
                     {isOngoing && p.progressPercentage && (
                       <div className="mb-2.5">
-                        <div className="flex justify-between text-[10px] font-mono text-amber-600 dark:text-amber-400 mb-1">
-                          <span>Development Progress</span>
+                        <div className="flex justify-between text-[10px] font-mono text-amber-500 mb-1">
+                          <span>Progress</span>
                           <span>{p.progressPercentage}%</span>
                         </div>
-                        <div className="w-full h-1.5 bg-amber-500/20 rounded-full overflow-hidden">
+                        <div className="w-full h-1 bg-amber-500/20 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-amber-500 rounded-full"
                             style={{ width: `${p.progressPercentage}%` }}
@@ -305,18 +292,9 @@ export function ITProjects() {
                       </div>
                     )}
 
-                    <div className="pt-2 border-t border-[#E0DACE]/50 dark:border-[#2E2824] flex items-center justify-between">
-                      <div className="flex flex-wrap gap-1">
-                        {p.techStack.slice(0, 3).map((t) => (
-                          <span
-                            key={t}
-                            className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#E0DACE]/40 dark:bg-[#2A2420] text-[#4A3F35] dark:text-[#D8D0C5]"
-                          >
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                      <span className="text-[10px] font-mono font-semibold text-[#E84634] flex items-center gap-0.5">
+                    <div className="pt-2 border-t border-black/10 dark:border-white/10 flex items-center justify-between text-[11px] font-mono text-[#71717A] dark:text-zinc-500">
+                      <span className="truncate pr-3">{p.techStack.slice(0, 3).join(' · ')}</span>
+                      <span className="text-[#E84634] font-semibold flex items-center gap-0.5 shrink-0">
                         Inspect <ArrowUpRight size={11} />
                       </span>
                     </div>

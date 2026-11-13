@@ -27,7 +27,7 @@ const FALLBACK_BOOKMARKS: BookmarkItem[] = [
   },
   {
     id: 'b-4',
-    title: 'Arkitektur Sistem Terdistribusi & High Scalability',
+    title: 'High Scalability — Distributed Systems Case Studies',
     url: 'https://highscalability.com',
     category: 'Software Engineering'
   },
@@ -120,7 +120,7 @@ export function Bookmarks() {
       </Helmet>
 
       <BoardPageLayout
-        pageTitle={`Knowledge Vault (${bookmarks.length} Bookmarks)`}
+        pageTitle={`Knowledge Vault (${bookmarks.length})`}
         pageSubtitle="Curated references on AI Research, Software Architecture, Design Philosophy, and Digital Media."
         breadcrumbCategory="Bookmarks"
         tabs={tabs}
@@ -128,40 +128,38 @@ export function Bookmarks() {
         onTabChange={setActiveCategory}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search title or domain..."
+        searchPlaceholder="Search bookmarks..."
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="divide-y divide-black/10 dark:divide-white/10">
           {filteredBookmarks.map((item, idx) => (
             <a
               key={item.id}
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE]/80 dark:border-[#332D29] hover:border-[#E84634] p-4 flex flex-col justify-between min-h-[155px] transition-all shadow-2xs"
+              className="group py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 transition-colors"
             >
-              <div>
-                <div className="flex items-center justify-between text-[11px] font-mono text-[#6E655B] dark:text-[#A39B8F] mb-2">
-                  <span className="font-bold text-[#2A2521] dark:text-[#F5F2EB]">
-                    {String(idx + 1).padStart(2, '0')}
-                  </span>
-                  <span className="inline-flex items-center gap-1 truncate max-w-[130px]">
-                    <Globe size={11} className="text-[#E84634] shrink-0" />
-                    <span className="truncate">{getDomain(item.url)}</span>
-                  </span>
-                </div>
-
-                <h3 className="text-sm sm:text-base font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors leading-snug mb-1.5">
+              <div className="flex items-baseline gap-3 min-w-0">
+                <span className="text-xs font-mono text-[#71717A] dark:text-zinc-500 shrink-0">
+                  {String(idx + 1).padStart(2, '0')}
+                </span>
+                <h3 className="text-sm sm:text-base font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] transition-colors truncate">
                   {item.title}
                 </h3>
               </div>
 
-              <div className="mt-3 pt-2 border-t border-[#E0DACE]/50 dark:border-[#2E2824] flex items-center justify-between text-[10px] font-mono">
-                <span className="px-2 py-0.5 rounded bg-[#E84634]/12 text-[#E84634] font-semibold truncate max-w-[150px]">
+              <div className="flex items-center gap-3 text-[11px] font-mono text-[#71717A] dark:text-zinc-500 shrink-0 pl-7 sm:pl-0">
+                <span className="text-[#E84634] font-semibold">
                   {item.category || 'General'}
+                </span>
+                <span aria-hidden="true">·</span>
+                <span className="inline-flex items-center gap-1">
+                  <Globe size={11} />
+                  <span>{getDomain(item.url)}</span>
                 </span>
                 <ExternalLink
                   size={12}
-                  className="text-[#6E655B] group-hover:text-[#E84634] shrink-0"
+                  className="text-[#71717A] group-hover:text-[#E84634] shrink-0"
                 />
               </div>
             </a>

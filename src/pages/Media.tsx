@@ -92,7 +92,7 @@ export function Media() {
     { id: 'all', label: 'All Media', icon: PlaySquare, badge: mediaItems.length },
     {
       id: 'video',
-      label: 'Videos & Talks',
+      label: 'Videos',
       icon: Tv,
       badge: mediaItems.filter((i) => (i.category || 'video').toLowerCase() === 'video').length
     },
@@ -123,25 +123,24 @@ export function Media() {
         onTabChange={setFilter}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search videos or podcasts..."
+        searchPlaceholder="Search media..."
       >
         <div className="space-y-4">
-          {/* Featured Spotify Strip */}
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#211D1A] border border-[#E0DACE] dark:border-[#332D29] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
+          <div className="p-4 rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
               <img
                 src={avatarImg}
                 alt="Late20s Playlist"
-                className="w-14 h-14 rounded-xl object-cover border border-[#E0DACE] dark:border-[#3A332E]"
+                className="w-12 h-12 rounded-xl object-cover border border-black/10 dark:border-white/10"
               />
               <div>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-[#1DB954] font-bold mb-0.5">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-[#1DB954] font-bold">
                   Spotify Official Playlist
                 </div>
-                <h3 className="text-xl font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB]">
+                <h3 className="text-lg font-serif-display font-bold text-[#18181B] dark:text-white">
                   Late20s — Curated by Randy
                 </h3>
-                <p className="text-xs text-[#6E655B] dark:text-[#A39B8F]">
+                <p className="text-xs text-[#52525B] dark:text-zinc-400">
                   Ambient focus, late-night coding sessions, and analog warmth.
                 </p>
               </div>
@@ -156,7 +155,6 @@ export function Media() {
             </a>
           </div>
 
-          {/* Media Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
             {filteredMedia.map((item, idx) => {
               const thumbnail = getMediaThumbnail(item.url, item.thumbnailUrl);
@@ -166,39 +164,37 @@ export function Media() {
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group rounded-xl bg-white dark:bg-[#211D1A] border border-[#E0DACE]/80 dark:border-[#332D29] hover:border-[#E84634] overflow-hidden flex flex-col justify-between transition-all shadow-2xs"
+                  className="group rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 hover:border-[#E84634]/70 overflow-hidden flex flex-col justify-between transition-all"
                 >
                   <div>
                     {thumbnail && (
-                      <div className="w-full aspect-video bg-[#E0DACE]/30 dark:bg-[#2A2420] overflow-hidden relative">
+                      <div className="w-full aspect-video bg-zinc-900 overflow-hidden relative">
                         <img
                           src={thumbnail}
                           alt={item.title}
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/65 text-white text-[10px] font-mono uppercase">
-                          {String(idx + 1).padStart(2, '0')} · {item.category || 'Media'}
-                        </span>
                       </div>
                     )}
                     <div className="p-3.5">
-                      <h4 className="text-sm font-serif-display font-bold text-[#2A2521] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors line-clamp-2 mb-1">
+                      <div className="text-[10px] font-mono text-[#71717A] dark:text-zinc-500 mb-1">
+                        {String(idx + 1).padStart(2, '0')} · {item.category || 'Media'}
+                      </div>
+                      <h4 className="text-sm font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] transition-colors line-clamp-2 mb-1">
                         {item.title}
                       </h4>
                       {item.description && (
-                        <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-[#52525B] dark:text-zinc-400 line-clamp-2 leading-relaxed">
                           {item.description}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  <div className="px-3.5 pb-3 pt-1 flex items-center justify-between text-[10px] font-mono">
-                    <span className="px-2 py-0.5 rounded bg-[#E84634]/12 text-[#E84634] font-semibold">
-                      {item.platform}
-                    </span>
-                    <span className="text-[#6E655B] dark:text-[#A39B8F] flex items-center gap-1 group-hover:text-[#E84634]">
+                  <div className="px-3.5 pb-3 pt-1 flex items-center justify-between text-[11px] font-mono text-[#71717A] dark:text-zinc-500">
+                    <span className="text-[#E84634] font-semibold">{item.platform}</span>
+                    <span className="flex items-center gap-1 group-hover:text-[#E84634]">
                       Open <ExternalLink size={10} />
                     </span>
                   </div>

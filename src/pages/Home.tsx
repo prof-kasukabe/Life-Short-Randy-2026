@@ -149,9 +149,9 @@ export function Home() {
     { id: 'verbal', label: 'Curated Verbal', icon: Library, badge: verbalCount },
     { id: 'reading', label: 'Reading List', icon: BookOpen, badge: recentPosts.length },
     { id: 'media', label: 'Watch & Listen', icon: PlaySquare, badge: recentMedia.length },
-    { id: 'identity', label: 'Identity Canvas', icon: Cpu },
     { id: 'projects', label: 'IT Projects', icon: Code2, badge: itProjects.length },
-    { id: 'tools', label: 'Creative Lab', icon: Sparkles, badge: 2 }
+    { id: 'identity', label: 'Identity', icon: Cpu },
+    { id: 'tools', label: 'Lab', icon: Sparkles, badge: 2 }
   ];
 
   const routeMap: Record<WorkspaceTab, string> = {
@@ -219,7 +219,7 @@ export function Home() {
   return (
     <>
       <Helmet>
-        <title>Randy | The Late 20s — Digital Realist &amp; Software Engineer</title>
+        <title>Randy Ardiansyah | The Late 20s — Software Engineer &amp; Digital Realist</title>
         <meta
           name="description"
           content="Randy Ardiansyah — Software Engineer & Digital Realist. Explore Curated Verbal, Reading List, Watch & Listen, and IT Projects."
@@ -229,7 +229,7 @@ export function Home() {
       <BoardPageLayout
         pageTitle="The Late 20s"
         pageSubtitle="Diving deeper into the process, embracing the discomfort, and bending fate to create meaningful digital systems."
-        breadcrumbCategory="Randy Ardiansyah"
+        breadcrumbCategory="Overview"
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={(id) => {
@@ -238,32 +238,32 @@ export function Home() {
         }}
         searchQuery={quickSearch}
         onSearchChange={setQuickSearch}
-        searchPlaceholder="Search active view..."
+        searchPlaceholder="Filter current view..."
         stageRightSlot={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {activeTab === 'verbal' && (
-              <div className="inline-flex items-center p-0.5 rounded-xl border border-[#E2DDD5] dark:border-[#2E2824] bg-white dark:bg-[#161311]">
+              <div className="inline-flex items-center p-0.5 rounded-lg border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-[#161618]">
                 <button
                   type="button"
                   onClick={() => setVerbalViewMode('shelf')}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-mono uppercase transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-mono uppercase transition-all cursor-pointer ${
                     verbalViewMode === 'shelf'
                       ? 'bg-[#E84634] text-white font-semibold'
-                      : 'text-[#6E655B] dark:text-[#A39B8F] hover:text-[#E84634]'
+                      : 'text-[#71717A] dark:text-zinc-400 hover:text-[#E84634]'
                   }`}
                 >
-                  3D Shelf
+                  3D
                 </button>
                 <button
                   type="button"
                   onClick={() => setVerbalViewMode('board')}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono uppercase transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-mono uppercase transition-all cursor-pointer ${
                     verbalViewMode === 'board'
                       ? 'bg-[#E84634] text-white font-semibold'
-                      : 'text-[#6E655B] dark:text-[#A39B8F] hover:text-[#E84634]'
+                      : 'text-[#71717A] dark:text-zinc-400 hover:text-[#E84634]'
                   }`}
                 >
-                  <LayoutGrid size={11} />
+                  <LayoutGrid size={10} />
                   <span>Grid</span>
                 </button>
               </div>
@@ -271,10 +271,11 @@ export function Home() {
 
             <Link
               to={routeMap[activeTab]}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#E84634] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-[#161618] hover:border-[#E84634]/60 text-[11px] font-medium text-[#18181B] dark:text-zinc-200 transition-colors"
+              title="Open dedicated page"
             >
-              <span className="hidden sm:inline">Full Page</span>
-              <ArrowUpRight size={13} />
+              <span className="hidden sm:inline">Expand</span>
+              <ArrowUpRight size={12} className="text-[#E84634]" />
             </Link>
           </div>
         }
@@ -285,35 +286,33 @@ export function Home() {
             {verbalViewMode === 'shelf' ? (
               <CuratedVerbalShelf items={featuredWorks} searchQuery={quickSearch} />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 {allVerbalItems.map((item, idx) => (
                   <div
                     key={item.id}
                     onClick={() => setVerbalViewMode('shelf')}
-                    className="group rounded-xl bg-[#FAFAF7] dark:bg-[#161311] border border-[#E2DDD5] dark:border-[#2C2623] hover:border-[#E84634] p-4 flex flex-col justify-between min-h-[175px] transition-all cursor-pointer"
+                    className="group rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 hover:border-[#E84634]/70 p-4 flex flex-col justify-between min-h-[165px] transition-all cursor-pointer"
                   >
                     <div>
-                      <div className="flex items-center justify-between text-[11px] font-mono text-[#7A7267] dark:text-[#9E9589] mb-2">
-                        <span className="font-bold text-[#231F1C] dark:text-[#F5F2EB]">
+                      <div className="flex items-center justify-between text-[11px] font-mono text-[#71717A] dark:text-zinc-500 mb-2">
+                        <span className="font-bold text-[#18181B] dark:text-zinc-300">
                           {String(idx + 1).padStart(2, '0')}
                         </span>
                         <span>{item.date || '2026'}</span>
                       </div>
-                      <h3 className="text-base font-serif-display font-bold text-[#231F1C] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors leading-snug mb-1.5">
+                      <h3 className="text-lg font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] transition-colors leading-snug mb-1.5">
                         {item.title}
                       </h3>
-                      <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-[#52525B] dark:text-zinc-400 line-clamp-2 leading-relaxed">
                         {item.description}
                       </p>
                     </div>
 
-                    <div className="mt-3 pt-2 border-t border-[#E2DDD5]/60 dark:border-[#2C2623] flex items-center justify-between text-[10px] font-mono">
-                      <span className="px-2 py-0.5 rounded bg-[#E84634]/12 text-[#E84634] font-semibold">
+                    <div className="mt-3 pt-2 border-t border-black/10 dark:border-white/10 flex items-center justify-between text-[11px] font-mono text-[#71717A] dark:text-zinc-500">
+                      <span className="text-[#E84634] font-semibold">
                         {item.category || 'Verbal'}
                       </span>
-                      <span className="text-[#7A7267] group-hover:text-[#E84634]">
-                        Inspect 3D &rarr;
-                      </span>
+                      <span className="group-hover:text-[#E84634]">Inspect 3D &rarr;</span>
                     </div>
                   </div>
                 ))}
@@ -326,8 +325,8 @@ export function Home() {
         {activeTab === 'reading' && (
           <>
             {selectedBlogPreview ? (
-              <div className="bg-[#FAFAF7] dark:bg-[#161311] border border-[#E2DDD5] dark:border-[#2C2623] rounded-2xl p-5 sm:p-7 max-w-3xl mx-auto">
-                <div className="flex items-center justify-between mb-5 pb-3 border-b border-[#E2DDD5] dark:border-[#2C2623]">
+              <div className="rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 p-5 sm:p-7">
+                <div className="flex items-center justify-between mb-5 pb-3 border-b border-black/10 dark:border-white/10">
                   <button
                     type="button"
                     onClick={() => setSelectedBlogPreview(null)}
@@ -336,14 +335,14 @@ export function Home() {
                     <ArrowLeft size={14} />
                     <span>Back to Reading List</span>
                   </button>
-                  <span className="text-xs font-serif-display italic text-[#7A7267] dark:text-[#9E9589]">
+                  <span className="text-xs font-serif-display italic text-[#71717A] dark:text-zinc-400">
                     {selectedBlogPreview.date} · {selectedBlogPreview.readTime || '5 min read'}
                   </span>
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-serif-display font-bold text-[#231F1C] dark:text-[#F5F2EB] mb-3">
+                <h3 className="text-2xl sm:text-3xl font-serif-display font-bold text-[#18181B] dark:text-white mb-3">
                   {selectedBlogPreview.title}
                 </h3>
-                <p className="text-sm sm:text-base text-[#4A3F35] dark:text-[#D8D0C5] leading-relaxed whitespace-pre-line mb-6">
+                <p className="text-sm sm:text-base text-[#3F3F46] dark:text-zinc-300 leading-relaxed whitespace-pre-line mb-6">
                   {selectedBlogPreview.content ||
                     selectedBlogPreview.excerpt ||
                     'Reflections and field notes written by Randy Ardiansyah on minimalist engineering, calm technology, and deliberate creative systems.'}
@@ -354,7 +353,7 @@ export function Home() {
                       href={selectedBlogPreview.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E84634] text-white text-xs font-semibold"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#18181B] dark:bg-white text-white dark:text-[#0D0D0F] text-xs font-semibold"
                     >
                       <span>Read External ({getDomain(selectedBlogPreview.url)})</span>
                       <ExternalLink size={13} />
@@ -362,7 +361,7 @@ export function Home() {
                   ) : (
                     <Link
                       to={`/blog/${selectedBlogPreview.id}`}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E84634] text-white text-xs font-semibold"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#18181B] dark:bg-white text-white dark:text-[#0D0D0F] text-xs font-semibold"
                     >
                       <span>Open Full Article</span>
                       <ArrowUpRight size={13} />
@@ -371,56 +370,38 @@ export function Home() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-                {filteredPosts.map((post, idx) => {
-                  const tagColors = [
-                    'bg-[#E84634]/12 text-[#E84634]',
-                    'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-                    'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-                    'bg-sky-500/15 text-sky-700 dark:text-sky-300'
-                  ];
-                  const badgeClass = tagColors[idx % tagColors.length];
-
-                  return (
-                    <article
-                      key={post.id}
-                      onClick={() => setSelectedBlogPreview(post)}
-                      className="group rounded-xl bg-[#FAFAF7] dark:bg-[#161311] border border-[#E2DDD5] dark:border-[#2C2623] hover:border-[#E84634] p-4 flex flex-col justify-between min-h-[175px] transition-all cursor-pointer"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between text-xs mb-2">
-                          <span className="font-mono font-bold text-[#231F1C] dark:text-[#F5F2EB]">
-                            {String(idx + 1).padStart(2, '0')}
-                          </span>
-                          <time className="text-[11px] font-serif-display italic text-[#7A7267] dark:text-[#9E9589]">
-                            {post.date}
-                          </time>
-                        </div>
-
-                        <h3 className="text-base font-serif-display font-bold text-[#231F1C] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors leading-snug mb-2">
+              <div className="divide-y divide-black/10 dark:divide-white/10">
+                {filteredPosts.map((post, idx) => (
+                  <article
+                    key={post.id}
+                    onClick={() => setSelectedBlogPreview(post)}
+                    className="group py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 cursor-pointer"
+                  >
+                    <div className="flex items-baseline gap-3 min-w-0">
+                      <span className="text-xs font-mono text-[#71717A] dark:text-zinc-500 shrink-0">
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
+                      <div className="min-w-0">
+                        <h3 className="text-base sm:text-lg font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] transition-colors leading-snug">
                           {post.title}
                         </h3>
-
                         {post.excerpt && (
-                          <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-[#52525B] dark:text-zinc-400 line-clamp-1 mt-0.5">
                             {post.excerpt}
                           </p>
                         )}
                       </div>
+                    </div>
 
-                      <div className="mt-3 pt-2">
-                        <div
-                          className={`w-full px-2.5 py-1 rounded-lg text-[10px] font-mono font-semibold flex items-center justify-between ${badgeClass}`}
-                        >
-                          <span className="truncate">
-                            {post.url ? getDomain(post.url) : 'Randy Journal'}
-                          </span>
-                          <span>{post.readTime || '5m'}</span>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
+                    <div className="flex items-center gap-3 text-[11px] font-mono text-[#71717A] dark:text-zinc-500 shrink-0 pl-7 sm:pl-0">
+                      <span>{post.url ? getDomain(post.url) : 'Journal'}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>{post.readTime || '5m'}</span>
+                      <span aria-hidden="true">·</span>
+                      <time className="text-[#18181B] dark:text-zinc-300">{post.date}</time>
+                    </div>
+                  </article>
+                ))}
               </div>
             )}
           </>
@@ -429,21 +410,21 @@ export function Home() {
         {/* 3. WATCH & LISTEN */}
         {activeTab === 'media' && (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#FAFAF7] dark:bg-[#161311] border border-[#E2DDD5] dark:border-[#2C2623] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="p-4 rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
                 <img
                   src={avatarImg}
                   alt="Late20s Playlist"
-                  className="w-12 h-12 rounded-xl object-cover border border-[#E2DDD5] dark:border-[#2C2623]"
+                  className="w-12 h-12 rounded-xl object-cover border border-black/10 dark:border-white/10"
                 />
                 <div>
                   <div className="text-[10px] font-mono uppercase tracking-widest text-[#1DB954] font-bold">
                     Spotify Curated Playlist
                   </div>
-                  <h3 className="text-lg font-serif-display font-bold text-[#231F1C] dark:text-[#F5F2EB]">
+                  <h3 className="text-lg font-serif-display font-bold text-[#18181B] dark:text-white">
                     Late20s — Curated by Randy
                   </h3>
-                  <p className="text-xs text-[#6E655B] dark:text-[#A39B8F]">
+                  <p className="text-xs text-[#52525B] dark:text-zinc-400">
                     Ambient focus, late-night coding sessions, and analog warmth.
                   </p>
                 </div>
@@ -467,39 +448,37 @@ export function Home() {
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group rounded-xl bg-[#FAFAF7] dark:bg-[#161311] border border-[#E2DDD5] dark:border-[#2C2623] hover:border-[#E84634] overflow-hidden flex flex-col justify-between transition-all"
+                    className="group rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 hover:border-[#E84634]/70 overflow-hidden flex flex-col justify-between transition-all"
                   >
                     <div>
                       {thumbnail && (
-                        <div className="w-full aspect-video bg-[#E2DDD5]/30 dark:bg-[#221E1B] overflow-hidden relative">
+                        <div className="w-full aspect-video bg-zinc-900 overflow-hidden relative">
                           <img
                             src={thumbnail}
                             alt={item.title}
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
-                          <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/65 text-white text-[10px] font-mono uppercase">
-                            {String(idx + 1).padStart(2, '0')} · {item.category || 'Media'}
-                          </span>
                         </div>
                       )}
                       <div className="p-3.5">
-                        <h4 className="text-sm font-serif-display font-bold text-[#231F1C] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors line-clamp-2 mb-1">
+                        <div className="text-[10px] font-mono text-[#71717A] dark:text-zinc-500 mb-1">
+                          {String(idx + 1).padStart(2, '0')} · {item.category || 'Media'}
+                        </div>
+                        <h4 className="text-sm font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] transition-colors line-clamp-2 mb-1">
                           {item.title}
                         </h4>
                         {item.description && (
-                          <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-[#52525B] dark:text-zinc-400 line-clamp-2 leading-relaxed">
                             {item.description}
                           </p>
                         )}
                       </div>
                     </div>
 
-                    <div className="px-3.5 pb-3 pt-1 flex items-center justify-between text-[10px] font-mono">
-                      <span className="px-2 py-0.5 rounded bg-[#E84634]/12 text-[#E84634] font-semibold">
-                        {item.platform}
-                      </span>
-                      <span className="text-[#7A7267] flex items-center gap-1 group-hover:text-[#E84634]">
+                    <div className="px-3.5 pb-3 pt-1 flex items-center justify-between text-[11px] font-mono text-[#71717A] dark:text-zinc-500">
+                      <span className="text-[#E84634] font-semibold">{item.platform}</span>
+                      <span className="flex items-center gap-1 group-hover:text-[#E84634]">
                         Play <ExternalLink size={10} />
                       </span>
                     </div>
@@ -510,38 +489,33 @@ export function Home() {
           </div>
         )}
 
-        {/* 4. IDENTITY CANVAS */}
-        {activeTab === 'identity' && <GenerativeParticleCanvas />}
-
-        {/* 5. IT PROJECTS */}
+        {/* 4. IT PROJECTS */}
         {activeTab === 'projects' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {filteredProjects.map((p) => {
               const isOngoing = p.status === 'in_progress';
               return (
                 <Link
                   key={p.id}
                   to="/projects"
-                  className="group rounded-xl bg-[#FAFAF7] dark:bg-[#161311] border border-[#E2DDD5] dark:border-[#2C2623] hover:border-[#E84634] p-4 flex flex-col justify-between transition-all"
+                  className="group rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 hover:border-[#E84634]/70 p-4 flex flex-col justify-between transition-all"
                 >
                   <div>
-                    <div className="flex items-center justify-between text-[10px] font-mono mb-2">
+                    <div className="flex items-center justify-between text-[11px] font-mono mb-2">
                       <span
-                        className={`px-2 py-0.5 rounded font-bold uppercase ${
-                          isOngoing
-                            ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
-                            : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                        className={`font-semibold uppercase ${
+                          isOngoing ? 'text-amber-500' : 'text-emerald-500'
                         }`}
                       >
                         {isOngoing ? 'In Progress' : 'Delivered'}
                       </span>
-                      <span className="text-[#7A7267] dark:text-[#9E9589]">{p.timeline}</span>
+                      <span className="text-[#71717A] dark:text-zinc-500">{p.timeline}</span>
                     </div>
 
-                    <h3 className="text-base font-serif-display font-bold text-[#231F1C] dark:text-[#F5F2EB] group-hover:text-[#E84634] transition-colors mb-1.5 leading-snug">
+                    <h3 className="text-lg font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] transition-colors mb-1.5 leading-snug">
                       {p.title}
                     </h3>
-                    <p className="text-xs text-[#6E655B] dark:text-[#A39B8F] line-clamp-2 mb-3">
+                    <p className="text-xs text-[#52525B] dark:text-zinc-400 line-clamp-2 mb-3">
                       {p.description}
                     </p>
                   </div>
@@ -549,11 +523,11 @@ export function Home() {
                   <div>
                     {isOngoing && p.progressPercentage && (
                       <div className="mb-3">
-                        <div className="flex justify-between text-[10px] font-mono text-amber-600 dark:text-amber-400 mb-1">
+                        <div className="flex justify-between text-[10px] font-mono text-amber-500 mb-1">
                           <span>Completion</span>
                           <span>{p.progressPercentage}%</span>
                         </div>
-                        <div className="w-full h-1.5 bg-amber-500/20 rounded-full overflow-hidden">
+                        <div className="w-full h-1 bg-amber-500/20 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-amber-500 rounded-full"
                             style={{ width: `${p.progressPercentage}%` }}
@@ -562,15 +536,8 @@ export function Home() {
                       </div>
                     )}
 
-                    <div className="flex flex-wrap gap-1 pt-2 border-t border-[#E2DDD5]/60 dark:border-[#2C2623]">
-                      {p.techStack.slice(0, 4).map((t) => (
-                        <span
-                          key={t}
-                          className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#E2DDD5]/50 dark:bg-[#221E1B] text-[#4A3F35] dark:text-[#D8D0C5]"
-                        >
-                          {t}
-                        </span>
-                      ))}
+                    <div className="pt-2 border-t border-black/10 dark:border-white/10 text-[11px] font-mono text-[#71717A] dark:text-zinc-500 truncate">
+                      {p.techStack.slice(0, 4).join(' · ')}
                     </div>
                   </div>
                 </Link>
@@ -579,46 +546,49 @@ export function Home() {
           </div>
         )}
 
+        {/* 5. IDENTITY CANVAS */}
+        {activeTab === 'identity' && <GenerativeParticleCanvas />}
+
         {/* 6. CREATIVE LAB */}
         {activeTab === 'tools' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             <Link
               to="/tools/dither"
-              className="group p-6 rounded-2xl bg-[#FAFAF7] dark:bg-[#161311] border border-[#E2DDD5] dark:border-[#2C2623] hover:border-[#E84634] transition-all flex flex-col justify-between min-h-[200px]"
+              className="group p-5 rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 hover:border-[#E84634]/70 transition-all flex flex-col justify-between min-h-[180px]"
             >
               <div>
-                <div className="w-10 h-10 rounded-xl bg-[#E84634]/12 text-[#E84634] flex items-center justify-center mb-4">
-                  <Sparkles size={20} />
+                <div className="w-9 h-9 rounded-lg bg-[#E84634]/12 text-[#E84634] flex items-center justify-center mb-3.5">
+                  <Sparkles size={18} />
                 </div>
-                <h3 className="text-2xl font-serif-display font-bold text-[#231F1C] dark:text-[#F5F2EB] group-hover:text-[#E84634] mb-2">
+                <h3 className="text-xl font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] mb-1.5">
                   Lumina Dither Studio
                 </h3>
-                <p className="text-xs sm:text-sm text-[#6E655B] dark:text-[#A39B8F] leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#52525B] dark:text-zinc-400 leading-relaxed">
                   Interactive client-side Floyd-Steinberg, Atkinson, and Bayer matrix retro dithering laboratory for images and visual art.
                 </p>
               </div>
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#E84634] mt-4 inline-flex items-center gap-1">
-                Launch Dither Tool <ArrowUpRight size={14} />
+              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-[#E84634] mt-4 inline-flex items-center gap-1">
+                Launch Dither Tool <ArrowUpRight size={13} />
               </span>
             </Link>
 
             <Link
               to="/tools/scratch"
-              className="group p-6 rounded-2xl bg-[#FAFAF7] dark:bg-[#161311] border border-[#E2DDD5] dark:border-[#2C2623] hover:border-[#E84634] transition-all flex flex-col justify-between min-h-[200px]"
+              className="group p-5 rounded-xl bg-black/[0.02] dark:bg-[#161618] border border-black/10 dark:border-white/10 hover:border-[#E84634]/70 transition-all flex flex-col justify-between min-h-[180px]"
             >
               <div>
-                <div className="w-10 h-10 rounded-xl bg-[#E84634]/12 text-[#E84634] flex items-center justify-center mb-4">
-                  <Compass size={20} />
+                <div className="w-9 h-9 rounded-lg bg-[#E84634]/12 text-[#E84634] flex items-center justify-center mb-3.5">
+                  <Compass size={18} />
                 </div>
-                <h3 className="text-2xl font-serif-display font-bold text-[#231F1C] dark:text-[#F5F2EB] group-hover:text-[#E84634] mb-2">
+                <h3 className="text-xl font-serif-display font-bold text-[#18181B] dark:text-white group-hover:text-[#E84634] mb-1.5">
                   Creative Scratch Pad
                 </h3>
-                <p className="text-xs sm:text-sm text-[#6E655B] dark:text-[#A39B8F] leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#52525B] dark:text-zinc-400 leading-relaxed">
                   Freeform interactive canvas playground for sketching ideas, visual experiments, and tactile strokes.
                 </p>
               </div>
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#E84634] mt-4 inline-flex items-center gap-1">
-                Launch Creative Scratch <ArrowUpRight size={14} />
+              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-[#E84634] mt-4 inline-flex items-center gap-1">
+                Launch Creative Scratch <ArrowUpRight size={13} />
               </span>
             </Link>
           </div>

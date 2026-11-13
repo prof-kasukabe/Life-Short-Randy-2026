@@ -19,12 +19,27 @@ import { Admin } from './pages/Admin';
 import { DitherTool } from './pages/DitherTool';
 import { CreativeScratch } from './pages/CreativeScratch';
 
+const MOUNTAIN_BACKDROP_URL =
+  'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2000&q=80';
+
 export default function App() {
   return (
     <ThemeProvider>
       <Router>
-        <div className="min-h-screen flex flex-col bg-[#EAE6DF] dark:bg-[#12100E] p-2 sm:p-4 lg:p-6 transition-colors duration-300">
-          <div className="flex-grow flex flex-col bg-[#FAFAF7] dark:bg-[#191614] rounded-2xl sm:rounded-[1.75rem] shadow-[0_12px_40px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] relative w-full max-w-[1380px] mx-auto border border-[#E2DDD5] dark:border-[#2C2623] overflow-x-hidden">
+        <div className="min-h-screen flex flex-col relative overflow-x-hidden bg-[#D6D3CE] dark:bg-[#09090B] transition-colors duration-300">
+          {/* Atmospheric Monochrome Mountain Backdrop */}
+          <div
+            aria-hidden="true"
+            className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat grayscale contrast-110 scale-[1.02] pointer-events-none"
+            style={{ backgroundImage: `url(${MOUNTAIN_BACKDROP_URL})` }}
+          />
+          <div
+            aria-hidden="true"
+            className="fixed inset-0 z-0 bg-gradient-to-b from-white/55 via-white/35 to-[#EAE6DF]/85 dark:from-black/65 dark:via-black/50 dark:to-[#09090B]/90 backdrop-blur-[2px] pointer-events-none transition-colors duration-300"
+          />
+
+          {/* Foreground Shell */}
+          <div className="relative z-10 flex flex-col min-h-screen">
             <Navbar />
             <main className="flex-grow flex flex-col">
               <Routes>
